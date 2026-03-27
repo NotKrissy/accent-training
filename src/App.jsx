@@ -406,7 +406,7 @@ function TodayTab({ store, setStore }) {
   if (phase === "passage" && todayPassage) return <ExerciseDetail ex={todayPassage} onBack={() => setPhase(null)} onDone={() => { markPhase("passage"); setPhase(null); }} />;
 
   return (
-    <div style={{ padding: "0 20px 120px" }}>
+    <div style={{ padding: "0 20px 40px" }}>
       {/* Header */}
       <div style={{ paddingTop: 20, marginBottom: 24 }}>
         <p style={{ fontSize: 14, color: T.muted, marginBottom: 4 }}>{formatDate(today)}</p>
@@ -516,7 +516,7 @@ function WarmupView({ onBack, onDone }) {
   };
 
   return (
-    <div style={{ padding: "0 20px 120px" }}>
+    <div style={{ padding: "0 20px 40px" }}>
       <button onClick={onBack} style={{ ...btn, display: "flex", alignItems: "center", gap: 6, color: T.primary, background: "none", padding: "16px 0", fontSize: 15, fontWeight: 600 }}>
         <ArrowLeft size={18} /> Back
       </button>
@@ -589,7 +589,7 @@ function ExerciseDetail({ ex, onBack, onDone }) {
   const [words, setWords] = useState(() => ex.pool ? pickWords(ex.pool) : null);
 
   return (
-    <div style={{ padding: "0 20px 120px" }}>
+    <div style={{ padding: "0 20px 40px" }}>
       <button onClick={onBack} style={{ ...btn, display: "flex", alignItems: "center", gap: 6, color: T.primary, background: "none", padding: "16px 0", fontSize: 15, fontWeight: 600 }}>
         <ArrowLeft size={18} /> Back
       </button>
@@ -711,7 +711,7 @@ function ExercisesTab({ store, setStore }) {
   }
 
   return (
-    <div style={{ padding: "0 20px 120px" }}>
+    <div style={{ padding: "0 20px 40px" }}>
       <div style={{ paddingTop: 20, marginBottom: 16 }}>
         <h1 style={{ fontSize: 26, fontWeight: 700, color: T.text, margin: 0 }}>Exercises</h1>
         <p style={{ fontSize: 14, color: T.muted, margin: "4px 0 0" }}>{EXERCISES.length} exercises across {Object.keys(AREA_META).length} areas</p>
@@ -808,7 +808,7 @@ function ProgressTab({ store }) {
   }).length;
 
   return (
-    <div style={{ padding: "0 20px 120px" }}>
+    <div style={{ padding: "0 20px 40px" }}>
       <div style={{ paddingTop: 20, marginBottom: 24 }}>
         <h1 style={{ fontSize: 26, fontWeight: 700, color: T.text, margin: 0 }}>Progress</h1>
       </div>
@@ -907,7 +907,7 @@ function CourseTab({ store, setStore }) {
   const pct = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
 
   return (
-    <div style={{ padding: "0 20px 120px" }}>
+    <div style={{ padding: "0 20px 40px" }}>
       <div style={{ paddingTop: 20, marginBottom: 20 }}>
         <h1 style={{ fontSize: 26, fontWeight: 700, color: T.text, margin: 0 }}>Course</h1>
         <p style={{ fontSize: 14, color: T.muted, margin: "4px 0 0" }}>Foundations of Accent Softening</p>
@@ -993,7 +993,7 @@ function SettingsTab() {
   const { needRefresh: [needRefresh], updateServiceWorker } = useRegisterSW();
 
   return (
-    <div style={{ padding: "0 20px 120px" }}>
+    <div style={{ padding: "0 20px 40px" }}>
       <div style={{ paddingTop: 20, marginBottom: 24 }}>
         <h1 style={{ fontSize: 26, fontWeight: 700, color: T.text, margin: 0 }}>Settings</h1>
       </div>
@@ -1049,27 +1049,26 @@ export default function App() {
   return (
     <div style={{
       fontFamily: "'Plus Jakarta Sans', system-ui, -apple-system, sans-serif",
-      background: T.bg, minHeight: "100vh", maxWidth: 480, margin: "0 auto", position: "relative",
+      background: T.bg, height: "100dvh", maxWidth: 480, margin: "0 auto",
+      display: "flex", flexDirection: "column", overflow: "hidden",
       WebkitFontSmoothing: "antialiased", color: T.text,
-      paddingTop: "env(safe-area-inset-top)",
     }}>
-      {/* Content */}
-      <div style={{ paddingBottom: 80 }}>
-        {tab === "today" && <TodayTab store={store} setStore={setStore} />}
+      {/* Scrollable content */}
+      <div style={{ flex: 1, overflowY: "auto", paddingTop: "env(safe-area-inset-top)" }}>
+        {tab === "today"     && <TodayTab store={store} setStore={setStore} />}
         {tab === "exercises" && <ExercisesTab store={store} setStore={setStore} />}
-        {tab === "progress" && <ProgressTab store={store} />}
-        {tab === "course" && <CourseTab store={store} setStore={setStore} />}
-        {tab === "settings" && <SettingsTab />}
+        {tab === "progress"  && <ProgressTab store={store} />}
+        {tab === "course"    && <CourseTab store={store} setStore={setStore} />}
+        {tab === "settings"  && <SettingsTab />}
       </div>
 
-      {/* Tab Bar */}
+      {/* Tab Bar — flex child, no position:fixed */}
       <div style={{
-        position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)",
-        width: "100%", maxWidth: 480,
+        flexShrink: 0,
         background: "rgba(255,255,255,0.95)", backdropFilter: "blur(12px)",
         borderTop: `1px solid ${T.border}`,
-        display: "flex", justifyContent: "space-around", padding: "8px 0 max(8px, env(safe-area-inset-bottom))",
-        zIndex: 100
+        display: "flex", justifyContent: "space-around",
+        padding: "8px 0 max(8px, env(safe-area-inset-bottom))",
       }}>
         {TABS.map(({ id, label, Icon }) => {
           const active = tab === id;
