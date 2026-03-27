@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Calendar, BookOpen, BarChart3, GraduationCap, ChevronRight, ChevronDown, Check, Clock, RotateCcw, Filter, X, Play, Pause, ArrowLeft, Flame, Target, Volume2 } from "lucide-react";
+import { Calendar, BookOpen, BarChart3, GraduationCap, ChevronRight, ChevronDown, Check, Clock, RotateCcw, Filter, X, Play, Pause, ArrowLeft, Flame, Target, Volume2, Settings } from "lucide-react";
+import { useRegisterSW } from 'virtual:pwa-register/react';
 
 // ─── COLOUR & DESIGN TOKENS ───
 const T = {
@@ -924,13 +925,47 @@ function CourseTab({ store, setStore }) {
 }
 
 // ═══════════════════════════════════════
+// ─── SETTINGS TAB ───
+// ═══════════════════════════════════════
+function SettingsTab() {
+  const { needRefresh: [needRefresh], updateServiceWorker } = useRegisterSW();
+
+  return (
+    <div style={{ padding: "0 20px 120px" }}>
+      <div style={{ paddingTop: 20, marginBottom: 24 }}>
+        <h1 style={{ fontSize: 26, fontWeight: 700, color: T.text, margin: 0 }}>Settings</h1>
+      </div>
+
+      <Card>
+        <p style={{ margin: "0 0 4px", fontSize: 15, fontWeight: 600, color: T.text }}>App Version</p>
+        <p style={{ margin: "0 0 16px", fontSize: 13, color: T.muted, lineHeight: 1.5 }}>
+          {needRefresh ? "A new version is available." : "You're on the latest version."}
+        </p>
+        <button
+          onClick={() => updateServiceWorker(true)}
+          style={{
+            ...btn, width: "100%", padding: "13px 0", borderRadius: 14,
+            background: needRefresh ? T.primary : T.primaryLight,
+            color: needRefresh ? "#fff" : T.primary,
+            fontSize: 15, fontWeight: 600,
+          }}
+        >
+          {needRefresh ? "Update Available — Refresh Now" : "Refresh to Latest Version"}
+        </button>
+      </Card>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════
 // ─── MAIN APP ───
 // ═══════════════════════════════════════
 const TABS = [
-  { id: "today", label: "Today", Icon: Calendar },
+  { id: "today",     label: "Today",     Icon: Calendar },
   { id: "exercises", label: "Exercises", Icon: BookOpen },
-  { id: "progress", label: "Progress", Icon: BarChart3 },
-  { id: "course", label: "Course", Icon: GraduationCap },
+  { id: "progress",  label: "Progress",  Icon: BarChart3 },
+  { id: "course",    label: "Course",    Icon: GraduationCap },
+  { id: "settings",  label: "Settings",  Icon: Settings },
 ];
 
 export default function App() {
@@ -961,6 +996,7 @@ export default function App() {
         {tab === "exercises" && <ExercisesTab store={store} setStore={setStore} />}
         {tab === "progress" && <ProgressTab store={store} />}
         {tab === "course" && <CourseTab store={store} setStore={setStore} />}
+        {tab === "settings" && <SettingsTab />}
       </div>
 
       {/* Tab Bar */}
@@ -977,7 +1013,7 @@ export default function App() {
           return (
             <button key={id} onClick={() => setTab(id)} style={{
               ...btn, display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
-              padding: "4px 16px", background: "none", color: active ? T.primary : T.muted,
+              padding: "4px 10px", background: "none", color: active ? T.primary : T.muted,
               transition: "color 0.15s"
             }}>
               <Icon size={22} strokeWidth={active ? 2.5 : 1.8} />
