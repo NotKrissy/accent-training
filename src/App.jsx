@@ -1,6 +1,16 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import { Calendar, BookOpen, BarChart3, GraduationCap, ChevronRight, ChevronDown, Check, Clock, RotateCcw, Filter, X, Play, Pause, ArrowLeft, Flame, Target, Volume2, Settings } from "lucide-react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { Calendar, BookOpen, BarChart3, GraduationCap, ChevronRight, ChevronDown, Check, Clock, RotateCcw, Filter, X, Play, Pause, ArrowLeft, Flame, Target, Volume2, Settings, Shuffle } from "lucide-react";
 import { useRegisterSW } from 'virtual:pwa-register/react';
+import {
+  CRUNCHING_DU, CRUNCHING_TU, CRUNCHING_STU, CRUNCHING_DR, CRUNCHING_TR, CRUNCHING_STR,
+  VOWEL_FOOT_GOOSE, VOWEL_PALM, VOWEL_THOUGHT, VOWEL_TRAP,
+  DARK_L_WORDS, FINAL_CONSONANTS, BOUNCING_G,
+  READING_PASSAGES,
+  CURRICULUM_SCHWA, CURRICULUM_DIPHTHONG_EI, CURRICULUM_DIPHTHONG_AI,
+  CURRICULUM_DIPHTHONG_OI, CURRICULUM_DIPHTHONG_AU, CURRICULUM_DIPHTHONG_OU,
+  CURRICULUM_R_SOUND, CURRICULUM_W_SOUND, CURRICULUM_PLOSIVES,
+  CURRICULUM_SCHWA_SENTENCES, CURRICULUM_DIPHTHONG_SENTENCES, CURRICULUM_R_SENTENCES,
+} from './data/exercises-data.js';
 
 // ─── COLOUR & DESIGN TOKENS ───
 const T = {
@@ -33,43 +43,17 @@ const SCHEDULE = [
 
 // ─── EXERCISES ───
 // content uses **word** for target-sound bolding
+// Wordlist exercises use pool: [{ word, ipa }] from the data file
 const EXERCISES = [
-  // ── CRUNCHING ──
-  { id: "cr-du", title: "DU- Cluster Drill", area: "crunching", tag: "DU-", type: "wordlist",
-    instruction: "Read each word 5 times slowly. Keep the D and \"yoo\" (/juː/) sounds clearly separate. Aim for \"d-yoo-ti\", not \"jooty\".",
-    content: ["duty", "dune", "duke", "dutiful", "dupe", "due", "dew", "duplicate", "endure", "produce", "overdue", "duration", "during"] },
-  { id: "cr-tu", title: "TU- Cluster Drill", area: "crunching", tag: "TU-", type: "wordlist",
-    instruction: "Read each word 5 times slowly. Keep the T and \"yoo\" (/juː/) sounds separate. Aim for \"t-yoo-na\", not \"choona\".",
-    content: ["tuna", "tube", "tune", "tuba", "tulip", "tutor", "tutorial", "Tuesday", "Tudor", "gratitude", "attitude", "opportunity", "stature"] },
-  { id: "cr-stu", title: "STU- Cluster Drill", area: "crunching", tag: "STU-", type: "wordlist",
-    instruction: "Read each word 5 times slowly. Three sounds layered: S, then T, then \"yoo\" (/juː/). Take your time with each.",
-    content: ["student", "studio", "study", "stupid", "stupendous", "stew", "stewed", "strenuous"] },
-  { id: "cr-dr-tr", title: "DR- & TR- Cluster Drill", area: "crunching", tag: "DR- / TR-", type: "wordlist",
-    instruction: "Read each word 5 times. Keep D or T separate from R – resist merging them into one sound.",
-    content: ["drain", "drive", "draw", "drew", "drop", "drink", "drizzle", "dramatic", "drift", "—", "train", "tree", "trip", "trail", "three", "trouble", "trust", "trained", "traditional"],
-    note: "Divider (—) separates DR- from TR- words." },
-  { id: "cr-str", title: "STR- Cluster Drill", area: "crunching", tag: "STR-", type: "wordlist",
-    instruction: "Read each word 5 times. Articulate S, T, and R individually before letting them flow together.",
-    content: ["street", "straight", "strange", "stream", "stretch", "strike", "strong", "structure", "strategy", "stroll", "streak"] },
+  // ── CRUNCHING (wordlists from data file) ──
+  CRUNCHING_DU, CRUNCHING_TU, CRUNCHING_STU, CRUNCHING_DR, CRUNCHING_TR, CRUNCHING_STR,
   { id: "cr-mix", title: "Mixed Crunching Passage", area: "crunching", tag: "All clusters", type: "passage",
     instruction: "Read at a steady, measured pace. Focus on separating every consonant cluster clearly.",
     content: "The **student** had a **duty** to **produce** a **tutorial** on **strategy** for her **tutor**. She **drew** up a **structure** for the **studio** session. The **train** was **due** at noon, so she had to **drive** **straight** to the **street** where the **tube** station stood. She **strolled** along, humming a **tune**, appreciating the **opportunity**.",
     table: { "DU-": ["duty", "produce", "due"], "TU-": ["tutorial", "tutor", "tube", "tune", "opportunity"], "STU-": ["student", "studio"], "DR-": ["drew", "drive"], "TR-": ["train"], "STR-": ["strategy", "structure", "straight", "street", "strolled"] } },
 
-  // ── VOWELS ──
-  { id: "vw-foot-goose", title: "FOOT & GOOSE – Lip Rounding", area: "vowels", tag: "ʊ / uː", type: "wordlist",
-    instruction: "Read each word 5 times. Focus on strong, deliberate lip rounding. Push lips forward into a firm circle.",
-    content: ["foot", "good", "book", "look", "put", "could", "would", "should", "wood", "hook", "—", "goose", "food", "mood", "moon", "room", "school", "cool", "pool", "two", "blue"],
-    note: "FOOT words (short ʊ) above the divider. GOOSE words (long uː) below." },
-  { id: "vw-palm", title: "PALM, BATH, START – Jaw Drop", area: "vowels", tag: "ɑː", type: "wordlist",
-    instruction: "Read each word 5 times. Drop the jaw fully and open up the back of the mouth. This vowel needs space.",
-    content: ["palm", "bath", "start", "path", "past", "ask", "class", "glass", "grass", "laugh", "half", "father", "car", "far", "heart", "park", "dark", "art", "draft", "craft"] },
-  { id: "vw-thought", title: "THOUGHT & FORCE – Back Space", area: "vowels", tag: "ɔː", type: "wordlist",
-    instruction: "Read each word 5 times. Find space at the back of the mouth with a good jaw drop. Lips slightly rounded.",
-    content: ["thought", "force", "caught", "bought", "taught", "walk", "talk", "wall", "all", "call", "fall", "ball", "law", "saw", "door", "floor", "more", "four", "north", "sort"] },
-  { id: "vw-trap", title: "TRAP – Widening Drill", area: "vowels", tag: "æ", type: "wordlist",
-    instruction: "Read each word 5 times. This vowel widens horizontally – spread, don't drop. Think of a slight smile shape.",
-    content: ["trap", "cat", "hat", "map", "back", "hand", "man", "plan", "black", "flat", "sand", "land", "stand", "band", "track", "can", "ran"] },
+  // ── VOWELS (wordlists from data file) ──
+  VOWEL_FOOT_GOOSE, VOWEL_PALM, VOWEL_THOUGHT, VOWEL_TRAP,
   { id: "vw-sent", title: "Mixed Vowel Sentences", area: "vowels", tag: "Mixed", type: "sentences",
     instruction: "Read each sentence 3 times at a measured pace. Target vowels are bolded.",
     content: [
@@ -83,10 +67,8 @@ const EXERCISES = [
     instruction: "Read once through at a steady pace. Focus on giving each bolded vowel its full shape – lip rounding, jaw drop, or widening as needed.",
     content: "The **school** **stood** at the end of a long **path**, past the **dark** **park** and the old stone **wall**. Every **morning**, the children would **walk** through the **tall** iron gates and across the **flat** playing field. In the main **hall**, the **floor** shone, and you **could** hear the **sound** of **footsteps** on the polished **wood**. The head teacher **asked** the **class** to sit **still**, then read from a **book** about a man who sailed **far** across the **north** sea. It was a **good** story, **full** of heart." },
 
-  // ── DARK L & FINAL CONSONANTS ──
-  { id: "dl-words", title: "Dark L Word List", area: "darkl", tag: "Dark L", type: "wordlist",
-    instruction: "Read each word 5 times. Sustain firm tip-of-tongue pressure on the L at the end. Don't let it vanish.",
-    content: ["little", "bottle", "people", "table", "middle", "travel", "canal", "beautiful", "capital", "hospital", "careful", "special", "local", "all", "well", "still", "tell", "will", "call", "full"] },
+  // ── DARK L & FINAL CONSONANTS (wordlists from data file) ──
+  DARK_L_WORDS, FINAL_CONSONANTS,
   { id: "dl-sent", title: "Dark L in Sentences", area: "darkl", tag: "Dark L", type: "sentences",
     instruction: "Read each sentence 3 times. Hold every bolded dark L firmly – especially in connected speech.",
     content: [
@@ -96,9 +78,6 @@ const EXERCISES = [
       "She could **still** see the **beautiful** **canal** from the **travel** office.",
       "**All** in **all**, it went quite **well**."
     ] },
-  { id: "fc-words", title: "Final Consonant Drill", area: "darkl", tag: "Finals", type: "wordlist",
-    instruction: "Read each word 5 times. Land firmly on the final sound – give it energy right to the end.",
-    content: ["strict", "draft", "helped", "fact", "reflect", "expect", "accept", "craft", "project", "effect", "direct", "impact", "protect", "asked", "looked", "talked", "walked", "worked", "risked", "against"] },
   { id: "fc-sent", title: "Final Consonants in Sentences", area: "darkl", tag: "Finals", type: "sentences",
     instruction: "Read each sentence 3 times at a measured pace. Every word ending must land clearly.",
     content: [
@@ -112,10 +91,8 @@ const EXERCISES = [
     instruction: "Read once through at a steady, measured pace. Focus on sustaining dark Ls and landing final consonants firmly.",
     content: "The **little** **hospital** on the **hill** had a **special** reputation across the **capital**. **People** would **travel** from **all** over to visit. The **staff** **worked** hard and **helped** every patient with **careful** attention. The head doctor **looked** at the **draft** report and **asked** her team to **reflect** on the **impact** of the new **project**. The results were **still** being **collected**, but the early **effect** was **beautiful** to see. It was a **fact** that the **local** community **felt** the benefit." },
 
-  // ── BOUNCING G ──
-  { id: "bg-words", title: "Clean -ing Word List", area: "bouncing-g", tag: "-ing", type: "wordlist",
-    instruction: "Read each word 5 times. Hold the back of your tongue against the roof of your mouth on the final /ŋ/ – do NOT release into a /ɡ/ bounce.",
-    content: ["singing", "walking", "running", "talking", "thinking", "working", "going", "morning", "evening", "nothing", "something", "anything", "bringing", "feeling", "beginning"] },
+  // ── BOUNCING G (wordlist from data file) ──
+  BOUNCING_G,
   { id: "bg-sent", title: "-ing in Sentences", area: "bouncing-g", tag: "-ing", type: "sentences",
     instruction: "Read each sentence 3 times. Every -ing ending should be a clean, held /ŋ/ with no bounce.",
     content: [
@@ -180,22 +157,15 @@ const EXERCISES = [
     instruction: "Read once through. Statements should land with downward inflection. The two questions should rise. Vary your tone to match the intention of each sentence.",
     content: "The team gathered in the boardroom at nine. The quarterly figures were stronger than expected. Revenue had climbed steadily since January. The head of sales presented the regional breakdown with confidence. Europe had outperformed North America for the second consecutive quarter. \"Does anyone have questions about the methodology?\" she asked. The room stayed quiet for a moment. Then the finance director spoke. \"The margins look solid, but can we sustain this into the second half?\" It was a fair challenge. She nodded and walked the room through the forecast." },
 
-  // ── SPEED & BREATH ──
-  { id: "sb-1", title: "Paced Reading – The Garden", area: "speed", tag: "Breath", type: "passage",
-    instruction: "Read at a deliberately slower pace than feels natural. Breathe at every full stop and comma. Sustain energy through to the end of each sentence.",
-    content: "The garden had been neglected for years. Weeds covered the paths, and the old wooden bench had started to rot. But in the far corner, beneath a tangle of ivy, a single rose bush had survived. Its flowers were small but vivid – a deep, stubborn red that refused to fade. She knelt beside it and cleared the ground around its roots. The soil was dry. She fetched water from the kitchen and poured it slowly, watching it soak into the earth." },
-  { id: "sb-2", title: "Paced Reading – The Station", area: "speed", tag: "Breath", type: "passage",
-    instruction: "Read at a measured pace. Let each sentence breathe. Don't rush through to the next one – pause at every full stop.",
-    content: "The station was quiet at this hour. A single train stood at the platform, its engine humming softly. The departure board showed two destinations. She checked her ticket and walked towards the front carriage. The doors opened with a gentle hiss. Inside, the seats were mostly empty. She chose a window seat facing forward and placed her bag on the rack above. The train pulled away without announcement. Fields appeared on both sides, stretching out under a pale grey sky." },
-  { id: "sb-3", title: "Paced Reading – The Presentation", area: "speed", tag: "Breath + Finals", type: "passage",
-    instruction: "This passage mirrors a work context. Read as if presenting to a room. Measured pace, clear final consonants, breath at natural pause points.",
-    content: "Good morning. Thank you for joining at short notice. I want to walk you through the regional performance data for the first quarter. The European market has shown consistent growth across all segments. Client retention improved by twelve per cent, driven largely by the revised onboarding process we introduced in January. The feedback from the sales team has been positive, though there are two areas I want to flag. First, the pipeline in the Nordic region is thinner than expected. Second, we are still waiting on regulatory approval in two markets. I will cover both in more detail on the next slide." },
-  { id: "sb-4", title: "Paced Reading – The Coast", area: "speed", tag: "Breath", type: "passage",
-    instruction: "Read slowly and steadily. Focus on deep diaphragmatic breathing between sentences. No gasping.",
-    content: "The coastal path curved along the cliff edge, high above the water. Below, the sea was calm and dark, broken only by the occasional white crest of a wave. Seabirds circled overhead, riding the wind without effort. She walked at an even pace, breathing in the salt air. The lighthouse stood at the far point, its white tower bright against the grey rock. She had walked this route many times before, but the view still held her attention. There was something settling about the rhythm of the sea." },
-  { id: "sb-5", title: "Paced Reading – The Brief", area: "speed", tag: "Breath + All targets", type: "passage",
-    instruction: "This passage is designed to test multiple target areas at once. Read at a measured, professional pace. Land every final consonant. Hold every dark L. Keep -ing endings clean.",
-    content: "The **student** completed her **tutorial** and **walked** to the **little** office at the end of the **hall**. She was **feeling** confident about the **draft** she had **produced**. The **structure** was **still** being refined, but the core **strategy** was **strong**. Her **tutor** had **asked** her to **reflect** on the **impact** of each section. She sat at the **table**, opened her notes, and began **working** through the feedback **carefully**. **Nothing** needed **drastic** change. The **opportunity** to present it to the **full** board was only a week away, and she intended to be ready." },
+  // ── SPEED & BREATH (20 passages from data file) ──
+  ...READING_PASSAGES,
+
+  // ── CURRICULUM (from data file) ──
+  CURRICULUM_SCHWA,
+  CURRICULUM_DIPHTHONG_EI, CURRICULUM_DIPHTHONG_AI, CURRICULUM_DIPHTHONG_OI,
+  CURRICULUM_DIPHTHONG_AU, CURRICULUM_DIPHTHONG_OU,
+  CURRICULUM_R_SOUND, CURRICULUM_W_SOUND, CURRICULUM_PLOSIVES,
+  CURRICULUM_SCHWA_SENTENCES, CURRICULUM_DIPHTHONG_SENTENCES, CURRICULUM_R_SENTENCES,
 ];
 
 // ── CURRICULUM ──
@@ -253,12 +223,13 @@ const CURRICULUM = [
 ];
 
 const AREA_META = {
-  crunching: { label: "Crunching", color: T.accent, bg: T.accentLight },
-  vowels: { label: "Vowels", color: "#6B5CA5", bg: "#EEEAF5" },
-  darkl: { label: "Dark L & Finals", color: "#3B7A9E", bg: "#E3F0F6" },
-  "bouncing-g": { label: "Bouncing G", color: "#9B6B3D", bg: "#F5EDE3" },
-  inflection: { label: "Inflection", color: "#7A5CA5", bg: "#F0EAF5" },
-  speed: { label: "Speed & Breath", color: T.primary, bg: T.primaryLight },
+  crunching:   { label: "Crunching",       color: T.accent,  bg: T.accentLight },
+  vowels:      { label: "Vowels",           color: "#6B5CA5", bg: "#EEEAF5" },
+  darkl:       { label: "Dark L & Finals",  color: "#3B7A9E", bg: "#E3F0F6" },
+  "bouncing-g":{ label: "Bouncing G",       color: "#9B6B3D", bg: "#F5EDE3" },
+  inflection:  { label: "Inflection",       color: "#7A5CA5", bg: "#F0EAF5" },
+  speed:       { label: "Speed & Breath",   color: T.primary, bg: T.primaryLight },
+  curriculum:  { label: "Curriculum",       color: "#2A8F82", bg: "#E0F2F0" },
 };
 
 // ─── STORAGE HELPERS ───
@@ -315,7 +286,7 @@ function RichText({ text, style }) {
 }
 
 // ─── TIMER COMPONENT ───
-function Timer({ duration }) {
+function Timer({ duration, onComplete }) {
   const [secs, setSecs] = useState(duration);
   const [running, setRunning] = useState(false);
   const ref = useRef(null);
@@ -323,7 +294,10 @@ function Timer({ duration }) {
   useEffect(() => {
     if (running && secs > 0) {
       ref.current = setTimeout(() => setSecs(s => s - 1), 1000);
-    } else if (secs === 0) setRunning(false);
+    } else if (secs === 0) {
+      setRunning(false);
+      onComplete?.();
+    }
     return () => clearTimeout(ref.current);
   }, [running, secs]);
 
@@ -354,16 +328,16 @@ function Timer({ duration }) {
 const btn = { border: "none", cursor: "pointer", fontFamily: "inherit" };
 
 // ─── CARD COMPONENT ───
-function Card({ children, style, onClick }) {
+const Card = React.forwardRef(function Card({ children, style, onClick }, ref) {
   return (
-    <div onClick={onClick} style={{
+    <div ref={ref} onClick={onClick} style={{
       background: T.card, borderRadius: 16, padding: 20, boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
       border: `1px solid ${T.border}`, ...style
     }}>
       {children}
     </div>
   );
-}
+});
 
 // ─── PILL / TAG ───
 function Pill({ label, color, bg, small }) {
@@ -391,22 +365,27 @@ function TodayTab({ store, setStore }) {
       : EXERCISES.filter(e => e.area === sched.area)
     : [];
 
-  const passageExercises = EXERCISES.filter(e => e.area === "speed");
   // Pick a passage based on day of month
-  const passageIdx = new Date().getDate() % passageExercises.length;
-  const todayPassage = passageExercises[passageIdx];
+  const passageIdx = new Date().getDate() % READING_PASSAGES.length;
+  const todayPassage = READING_PASSAGES[passageIdx];
 
   const [phase, setPhase] = useState(null); // 'warmup', 'drill', 'passage', or null
   const [selectedDrill, setSelectedDrill] = useState(null);
 
+  // Returns the expected previous practice day (skipping Sundays as rest days)
+  const getExpectedPrevDay = (dateStr) => {
+    const d = new Date(dateStr + "T12:00:00");
+    d.setDate(d.getDate() - 1);
+    while (d.getDay() === 0) d.setDate(d.getDate() - 1);
+    return d.toISOString().split("T")[0];
+  };
+
   const markPhase = (p) => {
     const updated = { ...store, sessions: { ...store.sessions, [today]: { ...session, [p]: true } } };
-    // Update streak
-    const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
-    const yStr = yesterday.toISOString().split("T")[0];
     const allDone = updated.sessions[today]?.warmup && updated.sessions[today]?.drill && updated.sessions[today]?.passage;
     if (allDone) {
-      if (updated.lastDate === yStr || updated.lastDate === today) {
+      const expectedPrev = getExpectedPrevDay(today);
+      if (updated.lastDate === expectedPrev || updated.lastDate === today) {
         if (updated.lastDate !== today) updated.streakCurrent += 1;
       } else if (!updated.lastDate) {
         updated.streakCurrent = 1;
@@ -468,19 +447,6 @@ function TodayTab({ store, setStore }) {
                 }
               }}
             />
-            {!session.drill && todayExercises.length > 1 && (
-              <div style={{ padding: "8px 0 0 52px" }}>
-                <p style={{ fontSize: 12, color: T.muted, margin: "0 0 6px" }}>Or choose one:</p>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                  {todayExercises.map(ex => (
-                    <button key={ex.id} onClick={() => { setSelectedDrill(ex); setPhase("drill"); }}
-                      style={{ ...btn, fontSize: 12, padding: "4px 10px", borderRadius: 12, border: `1px solid ${T.border}`, background: T.card, color: T.text }}>
-                      {ex.title}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Phase 3: Passage */}
@@ -534,7 +500,20 @@ function SessionPhaseCard({ number, title, subtitle, duration, done, onStart }) 
 // ─── WARMUP VIEW ───
 function WarmupView({ onBack, onDone }) {
   const [completed, setCompleted] = useState({});
+  const stepRefs = useRef({});
   const allDone = WARMUP.every(s => completed[s.id]);
+
+  const handleTimerComplete = (stepId) => {
+    setCompleted(prev => {
+      const next = WARMUP.find(s => !prev[s.id] && s.id !== stepId);
+      if (next) {
+        setTimeout(() => {
+          stepRefs.current[next.id]?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 150);
+      }
+      return { ...prev, [stepId]: true };
+    });
+  };
 
   return (
     <div style={{ padding: "0 20px 120px" }}>
@@ -545,7 +524,7 @@ function WarmupView({ onBack, onDone }) {
       <p style={{ fontSize: 14, color: T.muted, margin: "0 0 20px" }}>Daily articulation regime · 5 minutes</p>
 
       {WARMUP.map((step) => (
-        <Card key={step.id} style={{ marginBottom: 10, border: completed[step.id] ? `1px solid ${T.success}` : `1px solid ${T.border}` }}>
+        <Card key={step.id} ref={el => stepRefs.current[step.id] = el} style={{ marginBottom: 10, border: completed[step.id] ? `1px solid ${T.success}` : `1px solid ${T.border}` }}>
           <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
             <button onClick={() => setCompleted(c => ({ ...c, [step.id]: !c[step.id] }))}
               style={{ ...btn, width: 28, height: 28, borderRadius: "50%", border: `2px solid ${completed[step.id] ? T.success : T.border}`, background: completed[step.id] ? T.success : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 2 }}>
@@ -555,7 +534,7 @@ function WarmupView({ onBack, onDone }) {
               <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: T.text }}>{step.title}</p>
               <p style={{ margin: "4px 0 0", fontSize: 13, color: T.muted, lineHeight: 1.5 }}>{step.desc}</p>
               {step.detail && <p style={{ margin: "4px 0 0", fontSize: 13, color: T.primary, fontWeight: 500 }}>{step.detail}</p>}
-              {step.type === "timer" && !completed[step.id] && <Timer duration={step.duration} />}
+              {step.type === "timer" && !completed[step.id] && <Timer duration={step.duration} onComplete={() => handleTimerComplete(step.id)} />}
               {step.type === "reps" && !completed[step.id] && (
                 <p style={{ margin: "6px 0 0", fontSize: 13, color: T.accent, fontWeight: 600 }}>×{step.reps} {step.reps > 1 && step.id === "w6" ? "rounds" : "repetitions"}</p>
               )}
@@ -575,9 +554,39 @@ function WarmupView({ onBack, onDone }) {
   );
 }
 
+// ─── PICK WORDS (random balanced sample from pool) ───
+function pickWords(pool, count = 10) {
+  if (!pool || !pool.length) return [];
+  const groups = {};
+  pool.forEach(item => {
+    const g = item.group || "__all";
+    if (!groups[g]) groups[g] = [];
+    groups[g].push(item);
+  });
+  const keys = Object.keys(groups);
+  let result = [];
+  if (keys.length === 1) {
+    result = [...pool].sort(() => Math.random() - 0.5).slice(0, Math.min(count, pool.length));
+  } else {
+    const perGroup = Math.floor(count / keys.length);
+    keys.forEach(g => {
+      result.push(...[...groups[g]].sort(() => Math.random() - 0.5).slice(0, perGroup));
+    });
+    const needed = count - result.length;
+    if (needed > 0) {
+      const picked = new Set(result.map(w => w.word));
+      const extra = pool.filter(w => !picked.has(w.word)).sort(() => Math.random() - 0.5).slice(0, needed);
+      result.push(...extra);
+    }
+    result = result.sort(() => Math.random() - 0.5);
+  }
+  return result;
+}
+
 // ─── EXERCISE DETAIL VIEW ───
 function ExerciseDetail({ ex, onBack, onDone }) {
   const meta = AREA_META[ex.area] || { label: ex.area, color: T.primary, bg: T.primaryLight };
+  const [words, setWords] = useState(() => ex.pool ? pickWords(ex.pool) : null);
 
   return (
     <div style={{ padding: "0 20px 120px" }}>
@@ -593,12 +602,33 @@ function ExerciseDetail({ ex, onBack, onDone }) {
 
       <Card>
         {ex.type === "wordlist" && (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            {ex.content.map((w, i) =>
-              w === "—"
-                ? <div key={i} style={{ width: "100%", borderTop: `1px solid ${T.border}`, margin: "4px 0" }} />
-                : <span key={i} style={{ fontSize: 18, fontWeight: 600, color: T.text, padding: "6px 12px", background: T.primaryLight, borderRadius: 10 }}>{w}</span>
+          <div>
+            {ex.pool && (
+              <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10 }}>
+                <button onClick={() => setWords(pickWords(ex.pool))}
+                  style={{ ...btn, display: "flex", alignItems: "center", gap: 5,
+                    fontSize: 13, color: T.primary, background: T.primaryLight,
+                    padding: "5px 12px", borderRadius: 16, fontWeight: 600 }}>
+                  <Shuffle size={13} /> Shuffle
+                </button>
+              </div>
             )}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {(words || ex.content || []).map((item, i) => {
+                if (item === "—") return (
+                  <div key={i} style={{ width: "100%", borderTop: `1px solid ${T.border}`, margin: "4px 0" }} />
+                );
+                const word = typeof item === "string" ? item : item.word;
+                const ipa = typeof item === "object" ? item.ipa : null;
+                return (
+                  <div key={i} style={{ padding: "6px 12px", background: T.primaryLight,
+                    borderRadius: 10, display: "flex", alignItems: "baseline", gap: 5 }}>
+                    <span style={{ fontSize: 18, fontWeight: 600, color: T.text }}>{word}</span>
+                    {ipa && <span style={{ fontSize: 11, color: T.muted }}>/{ipa}/</span>}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
         {ex.type === "sentences" && (
@@ -654,6 +684,12 @@ function ExercisesTab({ store, setStore }) {
 
   const areas = Object.entries(AREA_META);
   const filtered = filter ? EXERCISES.filter(e => e.area === filter) : EXERCISES;
+  const mainExercises = filtered.filter(e => e.area !== "curriculum");
+  const currExercises = filter === "curriculum"
+    ? filtered
+    : filter === null
+      ? EXERCISES.filter(e => e.area === "curriculum")
+      : [];
 
   if (selected) {
     return (
@@ -678,7 +714,7 @@ function ExercisesTab({ store, setStore }) {
     <div style={{ padding: "0 20px 120px" }}>
       <div style={{ paddingTop: 20, marginBottom: 16 }}>
         <h1 style={{ fontSize: 26, fontWeight: 700, color: T.text, margin: 0 }}>Exercises</h1>
-        <p style={{ fontSize: 14, color: T.muted, margin: "4px 0 0" }}>{EXERCISES.length} exercises across {areas.length} target areas</p>
+        <p style={{ fontSize: 14, color: T.muted, margin: "4px 0 0" }}>{EXERCISES.length} exercises across {Object.keys(AREA_META).length} areas</p>
       </div>
 
       {/* Filters */}
@@ -697,7 +733,33 @@ function ExercisesTab({ store, setStore }) {
 
       {/* List */}
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        {filtered.map(ex => {
+        {(filter === "curriculum" ? [] : mainExercises).map(ex => {
+          const meta = AREA_META[ex.area] || {};
+          const doneCount = (store.exercisesDone[ex.id] || []).length;
+          return (
+            <Card key={ex.id} onClick={() => setSelected(ex)} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 14 }}>
+              <div style={{ width: 10, height: 10, borderRadius: "50%", background: meta.color || T.muted, flexShrink: 0 }} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: T.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{ex.title}</p>
+                <div style={{ display: "flex", gap: 6, marginTop: 4, alignItems: "center" }}>
+                  <Pill label={meta.label || ex.area} color={meta.color} bg={meta.bg} small />
+                  {ex.tag && <span style={{ fontSize: 11, color: T.muted }}>{ex.tag}</span>}
+                </div>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+                {doneCount > 0 && <span style={{ fontSize: 12, color: T.success, fontWeight: 600 }}>{doneCount}×</span>}
+                <ChevronRight size={18} color={T.muted} />
+              </div>
+            </Card>
+          );
+        })}
+
+        {/* Curriculum section */}
+        {currExercises.length > 0 && filter !== "curriculum" && (
+          <p style={{ fontSize: 12, fontWeight: 700, color: T.muted, textTransform: "uppercase",
+            letterSpacing: 0.8, margin: "6px 0 2px" }}>Curriculum</p>
+        )}
+        {currExercises.map(ex => {
           const meta = AREA_META[ex.area] || {};
           const doneCount = (store.exercisesDone[ex.id] || []).length;
           return (
@@ -988,7 +1050,8 @@ export default function App() {
     <div style={{
       fontFamily: "'Plus Jakarta Sans', system-ui, -apple-system, sans-serif",
       background: T.bg, minHeight: "100vh", maxWidth: 480, margin: "0 auto", position: "relative",
-      WebkitFontSmoothing: "antialiased", color: T.text
+      WebkitFontSmoothing: "antialiased", color: T.text,
+      paddingTop: "env(safe-area-inset-top)",
     }}>
       {/* Content */}
       <div style={{ paddingBottom: 80 }}>
