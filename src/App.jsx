@@ -232,6 +232,33 @@ const AREA_META = {
   curriculum:  { label: "Curriculum",       color: "#2A8F82", bg: "#E0F2F0" },
 };
 
+// ─── CURRICULUM → EXERCISE AREA MAPPING ───
+const CURRICULUM_AREA_MAP = {
+  s1: ["crunching"],
+  s2: ["vowels"],
+  s3: ["vowels"],
+  s4: ["vowels"],
+  s7: ["bouncing-g"],
+  s8: ["darkl"],
+  s9: ["inflection"],
+  // s5 (Plosives), s6 (Fricatives), s10, s11 have no matching exercise area yet
+};
+
+function getUnlockedAreas(curriculumKeys) {
+  const touched = new Set((curriculumKeys || []).map(k => k.split("-")[0]));
+  const areas = new Set(["speed"]); // speed always available (orphan — universal)
+  touched.forEach(sId => {
+    (CURRICULUM_AREA_MAP[sId] || []).forEach(a => areas.add(a));
+  });
+  return areas;
+}
+
+function pickFreePractice(curriculumKeys, count = 4) {
+  const unlocked = getUnlockedAreas(curriculumKeys);
+  const pool = EXERCISES.filter(e => e.area !== "curriculum" && unlocked.has(e.area));
+  return [...pool].sort(() => Math.random() - 0.5).slice(0, Math.min(count, pool.length));
+}
+
 // ─── STORAGE HELPERS ───
 const STORE_KEY = "elocution-app-v1";
 
@@ -357,7 +384,7 @@ function TodayTab({ store, setStore }) {
   const today = todayStr();
   const dow = dayOfWeek();
   const sched = SCHEDULE[dow];
-  const session = store.sessions[today] || { warmup: false, drill: false, passage: false };
+  const session = store.sessions[today] || { warmup: false, drill: false, passage: false, practice: false };
 
   const todayExercises = sched.area
     ? sched.area === "mixed"
@@ -369,8 +396,9 @@ function TodayTab({ store, setStore }) {
   const passageIdx = new Date().getDate() % READING_PASSAGES.length;
   const todayPassage = READING_PASSAGES[passageIdx];
 
-  const [phase, setPhase] = useState(null); // 'warmup', 'drill', 'passage', or null
+  const [phase, setPhase] = useState(null); // 'warmup', 'drill', 'passage', 'practice', or null
   const [selectedDrill, setSelectedDrill] = useState(null);
+  const [practiceExs] = useState(() => pickFreePractice(store.curriculum));
 
   // Returns the expected previous practice day (skipping Sundays as rest days)
   const getExpectedPrevDay = (dateStr) => {
@@ -382,7 +410,8 @@ function TodayTab({ store, setStore }) {
 
   const markPhase = (p) => {
     const updated = { ...store, sessions: { ...store.sessions, [today]: { ...session, [p]: true } } };
-    const allDone = updated.sessions[today]?.warmup && updated.sessions[today]?.drill && updated.sessions[today]?.passage;
+    const allDone = updated.sessions[today]?.warmup && updated.sessions[today]?.drill
+      && updated.sessions[today]?.passage && updated.sessions[today]?.practice;
     if (allDone) {
       const expectedPrev = getExpectedPrevDay(today);
       if (updated.lastDate === expectedPrev || updated.lastDate === today) {
@@ -399,11 +428,12 @@ function TodayTab({ store, setStore }) {
     saveStore(updated);
   };
 
-  const isComplete = session.warmup && session.drill && session.passage;
+  const isComplete = session.warmup && session.drill && session.passage && session.practice;
 
   if (phase === "warmup") return <WarmupView onBack={() => setPhase(null)} onDone={() => { markPhase("warmup"); setPhase(null); }} />;
   if (phase === "drill" && selectedDrill) return <ExerciseDetail ex={selectedDrill} onBack={() => { setPhase(null); setSelectedDrill(null); }} onDone={() => { markPhase("drill"); setPhase(null); setSelectedDrill(null); }} />;
   if (phase === "passage" && todayPassage) return <ExerciseDetail ex={todayPassage} onBack={() => setPhase(null)} onDone={() => { markPhase("passage"); setPhase(null); }} />;
+  if (phase === "practice") return <FreePracticeView exercises={practiceExs} onBack={() => setPhase(null)} onDone={() => { markPhase("practice"); setPhase(null); }} />;
 
   return (
     <div style={{ padding: "0 20px 40px" }}>
@@ -454,6 +484,14 @@ function TodayTab({ store, setStore }) {
             <SessionPhaseCard
               number="3" title="Reading Passage" subtitle="Speed & breath control" duration="5–8 min"
               done={session.passage} onStart={() => setPhase("passage")}
+            />
+          </div>
+
+          {/* Phase 4: Free Practice */}
+          <div style={{ marginTop: 12 }}>
+            <SessionPhaseCard
+              number="4" title="Free Practice" subtitle="Your unlocked areas" duration="10–15 min"
+              done={session.practice} onStart={() => setPhase("practice")}
             />
           </div>
         </>
@@ -581,6 +619,65 @@ function pickWords(pool, count = 10) {
     result = result.sort(() => Math.random() - 0.5);
   }
   return result;
+}
+
+// ─── FREE PRACTICE VIEW ───
+function FreePracticeView({ exercises, onBack, onDone }) {
+  const [opened, setOpened] = useState({});
+  const [viewing, setViewing] = useState(null);
+
+  if (viewing) {
+    return (
+      <ExerciseDetail
+        ex={viewing}
+        onBack={() => setViewing(null)}
+        onDone={() => { setOpened(o => ({ ...o, [viewing.id]: true })); setViewing(null); }}
+      />
+    );
+  }
+
+  const hasCurriculumGating = exercises.some(e => e.area !== "speed");
+
+  return (
+    <div style={{ padding: "0 20px 40px" }}>
+      <button onClick={onBack} style={{ ...btn, display: "flex", alignItems: "center", gap: 6, color: T.primary, background: "none", padding: "16px 0", fontSize: 15, fontWeight: 600 }}>
+        <ArrowLeft size={18} /> Back
+      </button>
+      <h2 style={{ fontSize: 22, fontWeight: 700, margin: "0 0 4px" }}>Free Practice</h2>
+      <p style={{ fontSize: 14, color: T.muted, margin: "0 0 20px", lineHeight: 1.5 }}>
+        {hasCurriculumGating
+          ? "4 exercises from areas you've covered in the Course"
+          : "Start the Course to unlock targeted practice · Speed drills available now"}
+      </p>
+
+      {exercises.map(ex => {
+        const meta = AREA_META[ex.area] || {};
+        const done = opened[ex.id];
+        return (
+          <Card key={ex.id} onClick={() => setViewing(ex)} style={{
+            marginBottom: 10, cursor: "pointer", display: "flex", alignItems: "center", gap: 14,
+            border: done ? `1px solid ${T.success}` : `1px solid ${T.border}`
+          }}>
+            <div style={{ width: 10, height: 10, borderRadius: "50%", background: meta.color || T.muted, flexShrink: 0 }} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: T.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{ex.title}</p>
+              <div style={{ marginTop: 4 }}>
+                <Pill label={meta.label || ex.area} color={meta.color} bg={meta.bg} small />
+              </div>
+            </div>
+            {done ? <Check size={18} color={T.success} /> : <ChevronRight size={18} color={T.muted} />}
+          </Card>
+        );
+      })}
+
+      <button onClick={onDone} style={{
+        ...btn, width: "100%", padding: "14px 0", borderRadius: 14, marginTop: 16,
+        background: T.primary, color: "#fff", fontSize: 15, fontWeight: 600
+      }}>
+        ✓ Mark Free Practice Complete
+      </button>
+    </div>
+  );
 }
 
 // ─── EXERCISE DETAIL VIEW ───
