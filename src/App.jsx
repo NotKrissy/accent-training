@@ -1447,8 +1447,6 @@ export default function App() {
         borderTop: `1px solid ${T.border}`,
         paddingBottom: "env(safe-area-inset-bottom)",
         zIndex: 100,
-        fontFamily: "'Plus Jakarta Sans', system-ui, -apple-system, sans-serif",
-        WebkitFontSmoothing: "antialiased",
       }}>
         {/* Inner container constrained to 480px and centered */}
         <div style={{ maxWidth: 480, margin: "0 auto", display: "flex", justifyContent: "space-around", padding: "8px 0 0" }}>
