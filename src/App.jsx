@@ -522,9 +522,14 @@ function TodayTab({ store, setStore }) {
   const sched = SCHEDULE[dow];
   const session = store.sessions[today] || { warmup: false, drill: false, passage: false, practice: false };
 
-  const todayExercises = sched.area === "mixed"
+  const unlocked = getUnlockedAreas(store.curriculum);
+  const areaAvailable = sched.area === "mixed" || unlocked.has(sched.area);
+
+  const todayExercises = sched.area === "mixed" || !areaAvailable
     ? [...EXERCISES.filter(e => e.area === "tongue-twisters"), ...EXERCISES.filter(e => e.area === "mixed")]
     : EXERCISES.filter(e => e.area === sched.area);
+
+  const drillLabel = areaAvailable ? sched.label : "Mixed Practice";
 
   // Pick a passage sequentially, advancing each day a session is completed
   const passageIdx = (store.passageDayCount || 0) % READING_PASSAGES.length;
@@ -576,8 +581,13 @@ function TodayTab({ store, setStore }) {
       <div style={{ paddingTop: 20, marginBottom: 24 }}>
         <p style={{ fontSize: 14, color: T.muted, marginBottom: 4 }}>{formatDate(today)}</p>
         <h1 style={{ fontSize: 26, fontWeight: 700, color: T.text, margin: 0, lineHeight: 1.2 }}>
-          {sched.icon} {sched.label}
+          {areaAvailable ? sched.icon : "🔄"} {drillLabel}
         </h1>
+        {!areaAvailable && (
+          <p style={{ fontSize: 13, color: T.muted, margin: "6px 0 0", lineHeight: 1.4 }}>
+            Complete <strong>{sched.label}</strong> in the Course to unlock those drills
+          </p>
+        )}
         {isComplete && (
           <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 8, color: T.success }}>
             <Check size={18} /> <span style={{ fontSize: 14, fontWeight: 600 }}>Session complete</span>
@@ -595,7 +605,7 @@ function TodayTab({ store, setStore }) {
         {/* Phase 2: Focused Drill */}
         <div style={{ marginTop: 12 }}>
           <SessionPhaseCard
-            number="2" title="Focused Drill" subtitle={sched.label} duration="5–7 min"
+            number="2" title="Focused Drill" subtitle={drillLabel} duration="5–7 min"
             done={session.drill}
             onStart={() => {
               if (todayExercises.length > 0) {
