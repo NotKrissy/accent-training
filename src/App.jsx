@@ -1149,7 +1149,7 @@ function SettingsTab({ darkMode, setDarkMode, store, setStore }) {
           {needRefresh ? "A new version is available." : "You're on the latest version."}
         </p>
         <button
-          onClick={() => updateServiceWorker(true)}
+          onClick={() => needRefresh ? updateServiceWorker(true) : window.location.reload()}
           style={{
             ...btn, width: "100%", padding: "13px 0", borderRadius: 14,
             background: needRefresh ? T.primary : T.primaryLight,
