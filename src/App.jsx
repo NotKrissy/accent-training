@@ -1219,7 +1219,7 @@ export default function App() {
   }, []);
 
   if (!loaded) return (
-    <div style={{ height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", color: T.muted }}>
+    <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", color: T.muted }}>
       Loading…
     </div>
   );
@@ -1228,7 +1228,7 @@ export default function App() {
     <ThemeContext.Provider value={T}>
     <div style={{
       fontFamily: "'Plus Jakarta Sans', system-ui, -apple-system, sans-serif",
-      background: T.bg, height: "100dvh", maxWidth: 480, margin: "0 auto",
+      background: T.bg, height: "100%", maxWidth: 480, margin: "0 auto",
       display: "flex", flexDirection: "column", overflow: "hidden",
       WebkitFontSmoothing: "antialiased", color: T.text,
     }}>
