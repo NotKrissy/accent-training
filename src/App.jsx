@@ -1424,46 +1424,57 @@ export default function App() {
     </div>
   );
 
+  const tabBarBg = darkMode ? "rgba(26,26,26,0.95)" : "rgba(255,255,255,0.95)";
+
   return (
     <ThemeContext.Provider value={T}>
-    <div style={{
-      fontFamily: "'Plus Jakarta Sans', system-ui, -apple-system, sans-serif",
-      background: T.bg, position: "fixed", top: 0, bottom: 0, left: 0, right: 0, maxWidth: 480, margin: "0 auto",
-      display: "flex", flexDirection: "column", overflow: "hidden",
-      WebkitFontSmoothing: "antialiased", color: T.text,
-    }}>
-      {/* Scrollable content */}
-      <div style={{ flex: 1, overflowY: "auto", paddingTop: "env(safe-area-inset-top)" }}>
-        {tab === "today"     && <TodayTab store={store} setStore={setStore} />}
-        {tab === "exercises" && <ExercisesTab store={store} setStore={setStore} />}
-        {tab === "progress"  && <ProgressTab store={store} />}
-        {tab === "course"    && <CourseTab store={store} setStore={setStore} />}
-        {tab === "settings"  && <SettingsTab darkMode={darkMode} setDarkMode={setDarkMode} store={store} setStore={setStore} />}
-      </div>
-
-      {/* Tab Bar — flex child, no position:fixed */}
+      {/* Full-screen wrapper — no max-width, so it truly reaches the physical bottom */}
       <div style={{
-        flexShrink: 0,
-        background: darkMode ? "rgba(26,26,26,0.95)" : "rgba(255,255,255,0.95)", backdropFilter: "blur(12px)",
-        borderTop: `1px solid ${T.border}`,
-        display: "flex", justifyContent: "space-around",
-        padding: "8px 0 max(8px, env(safe-area-inset-bottom))",
+        position: "fixed", top: 0, bottom: 0, left: 0, right: 0,
+        background: darkMode ? "#1a1a1a" : "#ffffff",
+        fontFamily: "'Plus Jakarta Sans', system-ui, -apple-system, sans-serif",
+        WebkitFontSmoothing: "antialiased",
       }}>
-        {TABS.map(({ id, label, Icon }) => {
-          const active = tab === id;
-          return (
-            <button key={id} onClick={() => setTab(id)} style={{
-              ...btn, display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
-              padding: "4px 10px", background: "none", color: active ? T.primary : T.muted,
-              transition: "color 0.15s"
-            }}>
-              <Icon size={22} strokeWidth={active ? 2.5 : 1.8} />
-              <span style={{ fontSize: 11, fontWeight: active ? 700 : 500 }}>{label}</span>
-            </button>
-          );
-        })}
+        {/* 480px centered column */}
+        <div style={{
+          maxWidth: 480, margin: "0 auto", height: "100%",
+          background: T.bg, display: "flex", flexDirection: "column",
+          overflow: "hidden", color: T.text,
+        }}>
+          {/* Scrollable content */}
+          <div style={{ flex: 1, overflowY: "auto", paddingTop: "env(safe-area-inset-top)" }}>
+            {tab === "today"     && <TodayTab store={store} setStore={setStore} />}
+            {tab === "exercises" && <ExercisesTab store={store} setStore={setStore} />}
+            {tab === "progress"  && <ProgressTab store={store} />}
+            {tab === "course"    && <CourseTab store={store} setStore={setStore} />}
+            {tab === "settings"  && <SettingsTab darkMode={darkMode} setDarkMode={setDarkMode} store={store} setStore={setStore} />}
+          </div>
+
+          {/* Tab Bar — flex child; padding-bottom covers home indicator */}
+          <div style={{
+            flexShrink: 0,
+            background: tabBarBg, backdropFilter: "blur(12px)",
+            borderTop: `1px solid ${T.border}`,
+            display: "flex", justifyContent: "space-around",
+            paddingTop: 8,
+            paddingBottom: "env(safe-area-inset-bottom)",
+          }}>
+            {TABS.map(({ id, label, Icon }) => {
+              const active = tab === id;
+              return (
+                <button key={id} onClick={() => setTab(id)} style={{
+                  ...btn, display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
+                  padding: "4px 10px", background: "none", color: active ? T.primary : T.muted,
+                  transition: "color 0.15s"
+                }}>
+                  <Icon size={22} strokeWidth={active ? 2.5 : 1.8} />
+                  <span style={{ fontSize: 11, fontWeight: active ? 700 : 500 }}>{label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
-    </div>
     </ThemeContext.Provider>
   );
 }
