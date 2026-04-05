@@ -1431,13 +1431,14 @@ export default function App() {
       {/* Full-screen wrapper — no max-width, so it truly reaches the physical bottom */}
       <div style={{
         position: "fixed", top: 0, bottom: 0, left: 0, right: 0,
+        display: "flex", flexDirection: "column",
         background: darkMode ? "#1a1a1a" : "#ffffff",
         fontFamily: "'Plus Jakarta Sans', system-ui, -apple-system, sans-serif",
         WebkitFontSmoothing: "antialiased",
       }}>
         {/* 480px centered column */}
         <div style={{
-          maxWidth: 480, margin: "0 auto", height: "100%",
+          flex: 1, width: "100%", maxWidth: 480, margin: "0 auto",
           background: T.bg, display: "flex", flexDirection: "column",
           overflow: "hidden", color: T.text,
         }}>
