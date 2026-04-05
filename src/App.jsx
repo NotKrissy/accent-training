@@ -13,12 +13,21 @@ import {
 } from './data/exercises-data.js';
 
 // ─── COLOUR & DESIGN TOKENS ───
-const T = {
+const LIGHT_THEME = {
   bg: "#FAF8F4", card: "#FFFFFF", primary: "#4A6741", primaryLight: "#E8EDE6",
   accent: "#C67B5C", accentLight: "#F5E6DE", text: "#2D2926", muted: "#8A8580",
   border: "#E8E4DF", success: "#4A6741", successLight: "#E8EDE6",
   warn: "#D4A03C", warnLight: "#FDF5E6",
 };
+
+const DARK_THEME = {
+  bg: "#0f0f0f", card: "#1a1a1a", primary: "#7b9ef0", primaryLight: "#1e2a42",
+  accent: "#f0a060", accentLight: "#2e1f0e", text: "#f0f0f0", muted: "#888888",
+  border: "#2a2a2a", success: "#4caf72", successLight: "#0e2018",
+  warn: "#e0a030", warnLight: "#2a1e00",
+};
+
+const ThemeContext = React.createContext(LIGHT_THEME);
 
 // ─── WARM-UP STEPS ───
 const WARMUP = [
@@ -32,7 +41,7 @@ const WARMUP = [
 
 // ─── WEEKLY SCHEDULE ───
 const SCHEDULE = [
-  { label: "Rest Day", area: null, icon: "☀️" },
+  { label: "Mixed Review", area: "mixed", icon: "🔄" },
   { label: "Crunching", area: "crunching", icon: "🔗" },
   { label: "Vowels", area: "vowels", icon: "🔊" },
   { label: "Dark L & Finals", area: "darkl", icon: "🎯" },
@@ -223,12 +232,12 @@ const CURRICULUM = [
 ];
 
 const AREA_META = {
-  crunching:   { label: "Crunching",       color: T.accent,  bg: T.accentLight },
+  crunching:   { label: "Crunching",       color: "#C67B5C", bg: "#F5E6DE" },
   vowels:      { label: "Vowels",           color: "#6B5CA5", bg: "#EEEAF5" },
   darkl:       { label: "Dark L & Finals",  color: "#3B7A9E", bg: "#E3F0F6" },
   "bouncing-g":{ label: "Bouncing G",       color: "#9B6B3D", bg: "#F5EDE3" },
   inflection:  { label: "Inflection",       color: "#7A5CA5", bg: "#F0EAF5" },
-  speed:       { label: "Speed & Breath",   color: T.primary, bg: T.primaryLight },
+  speed:       { label: "Speed & Breath",   color: "#4A6741", bg: "#E8EDE6" },
   curriculum:  { label: "Curriculum",       color: "#2A8F82", bg: "#E0F2F0" },
 };
 
@@ -269,6 +278,7 @@ const defaultState = () => ({
   streakCurrent: 0,
   streakBest: 0,
   lastDate: null,
+  passageDayCount: 0,
 });
 
 function loadStore() {
@@ -299,6 +309,7 @@ const last7Days = () => {
 
 // ─── TEXT RENDERING (bold targets) ───
 function RichText({ text, style }) {
+  const T = React.useContext(ThemeContext);
   if (!text) return null;
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
   return (
@@ -314,6 +325,7 @@ function RichText({ text, style }) {
 
 // ─── TIMER COMPONENT ───
 function Timer({ duration, onComplete }) {
+  const T = React.useContext(ThemeContext);
   const [secs, setSecs] = useState(duration);
   const [running, setRunning] = useState(false);
   const ref = useRef(null);
@@ -356,6 +368,7 @@ const btn = { border: "none", cursor: "pointer", fontFamily: "inherit" };
 
 // ─── CARD COMPONENT ───
 const Card = React.forwardRef(function Card({ children, style, onClick }, ref) {
+  const T = React.useContext(ThemeContext);
   return (
     <div ref={ref} onClick={onClick} style={{
       background: T.card, borderRadius: 16, padding: 20, boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
@@ -368,6 +381,7 @@ const Card = React.forwardRef(function Card({ children, style, onClick }, ref) {
 
 // ─── PILL / TAG ───
 function Pill({ label, color, bg, small }) {
+  const T = React.useContext(ThemeContext);
   return (
     <span style={{
       display: "inline-block", padding: small ? "2px 8px" : "3px 10px", borderRadius: 20,
@@ -381,30 +395,28 @@ function Pill({ label, color, bg, small }) {
 // ─── TODAY TAB ───
 // ═══════════════════════════════════════
 function TodayTab({ store, setStore }) {
+  const T = React.useContext(ThemeContext);
   const today = todayStr();
   const dow = dayOfWeek();
   const sched = SCHEDULE[dow];
   const session = store.sessions[today] || { warmup: false, drill: false, passage: false, practice: false };
 
-  const todayExercises = sched.area
-    ? sched.area === "mixed"
-      ? EXERCISES.filter(e => e.type === "passage").slice(0, 3)
-      : EXERCISES.filter(e => e.area === sched.area)
-    : [];
+  const todayExercises = sched.area === "mixed"
+    ? EXERCISES.filter(e => e.type === "passage").slice(0, 3)
+    : EXERCISES.filter(e => e.area === sched.area);
 
-  // Pick a passage based on day of month
-  const passageIdx = new Date().getDate() % READING_PASSAGES.length;
+  // Pick a passage sequentially, advancing each day a session is completed
+  const passageIdx = (store.passageDayCount || 0) % READING_PASSAGES.length;
   const todayPassage = READING_PASSAGES[passageIdx];
 
   const [phase, setPhase] = useState(null); // 'warmup', 'drill', 'passage', 'practice', or null
   const [selectedDrill, setSelectedDrill] = useState(null);
   const [practiceExs] = useState(() => pickFreePractice(store.curriculum));
 
-  // Returns the expected previous practice day (skipping Sundays as rest days)
+  // Returns the expected previous practice day
   const getExpectedPrevDay = (dateStr) => {
     const d = new Date(dateStr + "T12:00:00");
     d.setDate(d.getDate() - 1);
-    while (d.getDay() === 0) d.setDate(d.getDate() - 1);
     return d.toISOString().split("T")[0];
   };
 
@@ -413,9 +425,10 @@ function TodayTab({ store, setStore }) {
     const allDone = updated.sessions[today]?.warmup && updated.sessions[today]?.drill
       && updated.sessions[today]?.passage && updated.sessions[today]?.practice;
     if (allDone) {
+      const isNewDay = updated.lastDate !== today;
       const expectedPrev = getExpectedPrevDay(today);
       if (updated.lastDate === expectedPrev || updated.lastDate === today) {
-        if (updated.lastDate !== today) updated.streakCurrent += 1;
+        if (isNewDay) updated.streakCurrent += 1;
       } else if (!updated.lastDate) {
         updated.streakCurrent = 1;
       } else {
@@ -423,6 +436,7 @@ function TodayTab({ store, setStore }) {
       }
       updated.streakBest = Math.max(updated.streakBest, updated.streakCurrent);
       updated.lastDate = today;
+      if (isNewDay) updated.passageDayCount = (updated.passageDayCount || 0) + 1;
     }
     setStore(updated);
     saveStore(updated);
@@ -441,7 +455,7 @@ function TodayTab({ store, setStore }) {
       <div style={{ paddingTop: 20, marginBottom: 24 }}>
         <p style={{ fontSize: 14, color: T.muted, marginBottom: 4 }}>{formatDate(today)}</p>
         <h1 style={{ fontSize: 26, fontWeight: 700, color: T.text, margin: 0, lineHeight: 1.2 }}>
-          {sched.area ? `${sched.icon} ${sched.label}` : "☀️ Rest Day"}
+          {sched.icon} {sched.label}
         </h1>
         {isComplete && (
           <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 8, color: T.success }}>
@@ -450,52 +464,44 @@ function TodayTab({ store, setStore }) {
         )}
       </div>
 
-      {sched.area === null ? (
-        <Card>
-          <p style={{ color: T.muted, lineHeight: 1.6, margin: 0 }}>
-            Rest day. No structured session – but if you want to practise, head to the Exercises tab and pick anything that interests you.
-          </p>
-        </Card>
-      ) : (
-        <>
-          {/* Phase 1: Warm-up */}
+      <>
+        {/* Phase 1: Warm-up */}
+        <SessionPhaseCard
+          number="1" title="Warm-Up" subtitle="Articulation regime" duration="5 min"
+          done={session.warmup} onStart={() => setPhase("warmup")}
+        />
+
+        {/* Phase 2: Focused Drill */}
+        <div style={{ marginTop: 12 }}>
           <SessionPhaseCard
-            number="1" title="Warm-Up" subtitle="Articulation regime" duration="5 min"
-            done={session.warmup} onStart={() => setPhase("warmup")}
+            number="2" title="Focused Drill" subtitle={sched.label} duration="5–7 min"
+            done={session.drill}
+            onStart={() => {
+              if (todayExercises.length > 0) {
+                const idx = new Date().getDate() % todayExercises.length;
+                setSelectedDrill(todayExercises[idx]);
+                setPhase("drill");
+              }
+            }}
           />
+        </div>
 
-          {/* Phase 2: Focused Drill */}
-          <div style={{ marginTop: 12 }}>
-            <SessionPhaseCard
-              number="2" title="Focused Drill" subtitle={sched.label} duration="5–7 min"
-              done={session.drill}
-              onStart={() => {
-                if (todayExercises.length > 0) {
-                  const idx = new Date().getDate() % todayExercises.length;
-                  setSelectedDrill(todayExercises[idx]);
-                  setPhase("drill");
-                }
-              }}
-            />
-          </div>
+        {/* Phase 3: Passage */}
+        <div style={{ marginTop: 12 }}>
+          <SessionPhaseCard
+            number="3" title="Reading Passage" subtitle="Speed & breath control" duration="5–8 min"
+            done={session.passage} onStart={() => setPhase("passage")}
+          />
+        </div>
 
-          {/* Phase 3: Passage */}
-          <div style={{ marginTop: 12 }}>
-            <SessionPhaseCard
-              number="3" title="Reading Passage" subtitle="Speed & breath control" duration="5–8 min"
-              done={session.passage} onStart={() => setPhase("passage")}
-            />
-          </div>
-
-          {/* Phase 4: Free Practice */}
-          <div style={{ marginTop: 12 }}>
-            <SessionPhaseCard
-              number="4" title="Free Practice" subtitle="Your unlocked areas" duration="10–15 min"
-              done={session.practice} onStart={() => setPhase("practice")}
-            />
-          </div>
-        </>
-      )}
+        {/* Phase 4: Free Practice */}
+        <div style={{ marginTop: 12 }}>
+          <SessionPhaseCard
+            number="4" title="Free Practice" subtitle="Your unlocked areas" duration="10–15 min"
+            done={session.practice} onStart={() => setPhase("practice")}
+          />
+        </div>
+      </>
 
       {/* Streak */}
       <Card style={{ marginTop: 24, display: "flex", alignItems: "center", gap: 16 }}>
@@ -512,6 +518,7 @@ function TodayTab({ store, setStore }) {
 }
 
 function SessionPhaseCard({ number, title, subtitle, duration, done, onStart }) {
+  const T = React.useContext(ThemeContext);
   return (
     <Card onClick={!done ? onStart : undefined} style={{
       display: "flex", alignItems: "center", gap: 14, cursor: done ? "default" : "pointer",
@@ -537,6 +544,7 @@ function SessionPhaseCard({ number, title, subtitle, duration, done, onStart }) 
 
 // ─── WARMUP VIEW ───
 function WarmupView({ onBack, onDone }) {
+  const T = React.useContext(ThemeContext);
   const [completed, setCompleted] = useState({});
   const stepRefs = useRef({});
   const allDone = WARMUP.every(s => completed[s.id]);
@@ -623,6 +631,7 @@ function pickWords(pool, count = 10) {
 
 // ─── FREE PRACTICE VIEW ───
 function FreePracticeView({ exercises, onBack, onDone }) {
+  const T = React.useContext(ThemeContext);
   const [opened, setOpened] = useState({});
   const [viewing, setViewing] = useState(null);
 
@@ -682,6 +691,7 @@ function FreePracticeView({ exercises, onBack, onDone }) {
 
 // ─── EXERCISE DETAIL VIEW ───
 function ExerciseDetail({ ex, onBack, onDone }) {
+  const T = React.useContext(ThemeContext);
   const meta = AREA_META[ex.area] || { label: ex.area, color: T.primary, bg: T.primaryLight };
   const [words, setWords] = useState(() => ex.pool ? pickWords(ex.pool) : null);
 
@@ -776,6 +786,7 @@ function ExerciseDetail({ ex, onBack, onDone }) {
 // ─── EXERCISES TAB ───
 // ═══════════════════════════════════════
 function ExercisesTab({ store, setStore }) {
+  const T = React.useContext(ThemeContext);
   const [filter, setFilter] = useState(null);
   const [selected, setSelected] = useState(null);
 
@@ -885,6 +896,7 @@ function ExercisesTab({ store, setStore }) {
 // ─── PROGRESS TAB ───
 // ═══════════════════════════════════════
 function ProgressTab({ store }) {
+  const T = React.useContext(ThemeContext);
   const days = last7Days();
   const today = todayStr();
 
@@ -901,7 +913,7 @@ function ProgressTab({ store }) {
 
   const totalSessionsThisWeek = days.filter(d => {
     const s = store.sessions[d];
-    return s && s.warmup && s.drill && s.passage;
+    return s && s.warmup && s.drill && s.passage && s.practice;
   }).length;
 
   return (
@@ -920,7 +932,7 @@ function ProgressTab({ store }) {
         <Card style={{ textAlign: "center" }}>
           <Target size={24} color={T.primary} style={{ margin: "0 auto 6px" }} />
           <p style={{ margin: 0, fontSize: 28, fontWeight: 700, color: T.text }}>{totalSessionsThisWeek}<span style={{ fontSize: 16, color: T.muted }}>/7</span></p>
-          <p style={{ margin: 0, fontSize: 12, color: T.muted }}>This week</p>
+          <p style={{ margin: 0, fontSize: 12, color: T.muted }}>Full sessions</p>
         </Card>
       </div>
 
@@ -958,10 +970,15 @@ function ProgressTab({ store }) {
         {Object.entries(AREA_META).map(([key, meta]) => {
           const count = weekAreaCounts[key] || 0;
           return (
-            <div key={key} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-              <div style={{ width: 10, height: 10, borderRadius: "50%", background: meta.color, flexShrink: 0 }} />
-              <span style={{ flex: 1, fontSize: 14, color: T.text }}>{meta.label}</span>
-              <span style={{ fontSize: 14, fontWeight: 600, color: count > 0 ? meta.color : T.muted }}>{count} session{count !== 1 ? "s" : ""}</span>
+            <div key={key} style={{ marginBottom: 12 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
+                <div style={{ width: 10, height: 10, borderRadius: "50%", background: meta.color, flexShrink: 0 }} />
+                <span style={{ flex: 1, fontSize: 14, color: T.text }}>{meta.label}</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: count > 0 ? meta.color : T.muted }}>{count}</span>
+              </div>
+              <div style={{ marginLeft: 20, height: 4, background: T.border, borderRadius: 2, overflow: "hidden" }}>
+                <div style={{ height: "100%", width: `${Math.min(count / 5, 1) * 100}%`, background: meta.color, borderRadius: 2, transition: "width 0.3s" }} />
+              </div>
             </div>
           );
         })}
@@ -985,6 +1002,7 @@ function ProgressTab({ store }) {
 // ─── COURSE TAB ───
 // ═══════════════════════════════════════
 function CourseTab({ store, setStore }) {
+  const T = React.useContext(ThemeContext);
   const [expanded, setExpanded] = useState(null);
   const completed = store.curriculum || [];
   const totalLessons = CURRICULUM.reduce((a, s) => a + s.lessons.length, 0);
@@ -1086,8 +1104,16 @@ function CourseTab({ store, setStore }) {
 // ═══════════════════════════════════════
 // ─── SETTINGS TAB ───
 // ═══════════════════════════════════════
-function SettingsTab() {
+function SettingsTab({ darkMode, setDarkMode, store, setStore }) {
+  const T = React.useContext(ThemeContext);
   const { needRefresh: [needRefresh], updateServiceWorker } = useRegisterSW();
+  const [confirmReset, setConfirmReset] = useState(false);
+
+  const handleReset = () => {
+    localStorage.removeItem(STORE_KEY);
+    setStore(defaultState());
+    setConfirmReset(false);
+  };
 
   return (
     <div style={{ padding: "0 20px 40px" }}>
@@ -1095,7 +1121,29 @@ function SettingsTab() {
         <h1 style={{ fontSize: 26, fontWeight: 700, color: T.text, margin: 0 }}>Settings</h1>
       </div>
 
-      <Card>
+      {/* Appearance */}
+      <Card style={{ marginBottom: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div>
+            <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: T.text }}>Appearance</p>
+            <p style={{ margin: "2px 0 0", fontSize: 13, color: T.muted }}>{darkMode ? "Dark mode" : "Light mode"}</p>
+          </div>
+          <button onClick={() => setDarkMode(!darkMode)} style={{
+            ...btn, width: 52, height: 28, borderRadius: 14, flexShrink: 0,
+            background: darkMode ? T.primary : T.border,
+            position: "relative", transition: "background 0.2s",
+          }}>
+            <div style={{
+              position: "absolute", top: 3, left: darkMode ? 27 : 3,
+              width: 22, height: 22, borderRadius: "50%", background: "#fff",
+              transition: "left 0.2s", boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
+            }} />
+          </button>
+        </div>
+      </Card>
+
+      {/* App Version */}
+      <Card style={{ marginBottom: 12 }}>
         <p style={{ margin: "0 0 4px", fontSize: 15, fontWeight: 600, color: T.text }}>App Version</p>
         <p style={{ margin: "0 0 16px", fontSize: 13, color: T.muted, lineHeight: 1.5 }}>
           {needRefresh ? "A new version is available." : "You're on the latest version."}
@@ -1111,6 +1159,31 @@ function SettingsTab() {
         >
           {needRefresh ? "Update Available — Refresh Now" : "Refresh to Latest Version"}
         </button>
+      </Card>
+
+      {/* Reset Progress */}
+      <Card>
+        <p style={{ margin: "0 0 4px", fontSize: 15, fontWeight: 600, color: T.text }}>Reset Progress</p>
+        <p style={{ margin: "0 0 16px", fontSize: 13, color: T.muted, lineHeight: 1.5 }}>
+          Clears all sessions, streaks, and exercise history. This cannot be undone.
+        </p>
+        {confirmReset ? (
+          <div style={{ display: "flex", gap: 8 }}>
+            <button onClick={handleReset} style={{
+              ...btn, flex: 1, padding: "13px 0", borderRadius: 14,
+              background: "#C0392B", color: "#fff", fontSize: 14, fontWeight: 600,
+            }}>Yes, reset everything</button>
+            <button onClick={() => setConfirmReset(false)} style={{
+              ...btn, flex: 1, padding: "13px 0", borderRadius: 14,
+              background: T.primaryLight, color: T.primary, fontSize: 14, fontWeight: 600,
+            }}>Cancel</button>
+          </div>
+        ) : (
+          <button onClick={() => setConfirmReset(true)} style={{
+            ...btn, width: "100%", padding: "13px 0", borderRadius: 14,
+            background: T.primaryLight, color: T.primary, fontSize: 15, fontWeight: 600,
+          }}>Reset All Progress</button>
+        )}
       </Card>
     </div>
   );
@@ -1131,6 +1204,14 @@ export default function App() {
   const [tab, setTab] = useState("today");
   const [store, setStore] = useState(defaultState());
   const [loaded, setLoaded] = useState(false);
+  const [darkMode, setDarkModeState] = useState(() => localStorage.getItem("theme") === "dark");
+
+  const setDarkMode = (dark) => {
+    setDarkModeState(dark);
+    localStorage.setItem("theme", dark ? "dark" : "light");
+  };
+
+  const T = darkMode ? DARK_THEME : LIGHT_THEME;
 
   useEffect(() => {
     setStore(loadStore());
@@ -1144,6 +1225,7 @@ export default function App() {
   );
 
   return (
+    <ThemeContext.Provider value={T}>
     <div style={{
       fontFamily: "'Plus Jakarta Sans', system-ui, -apple-system, sans-serif",
       background: T.bg, height: "100dvh", maxWidth: 480, margin: "0 auto",
@@ -1156,13 +1238,13 @@ export default function App() {
         {tab === "exercises" && <ExercisesTab store={store} setStore={setStore} />}
         {tab === "progress"  && <ProgressTab store={store} />}
         {tab === "course"    && <CourseTab store={store} setStore={setStore} />}
-        {tab === "settings"  && <SettingsTab />}
+        {tab === "settings"  && <SettingsTab darkMode={darkMode} setDarkMode={setDarkMode} store={store} setStore={setStore} />}
       </div>
 
       {/* Tab Bar — flex child, no position:fixed */}
       <div style={{
         flexShrink: 0,
-        background: "rgba(255,255,255,0.95)", backdropFilter: "blur(12px)",
+        background: darkMode ? "rgba(26,26,26,0.95)" : "rgba(255,255,255,0.95)", backdropFilter: "blur(12px)",
         borderTop: `1px solid ${T.border}`,
         display: "flex", justifyContent: "space-around",
         padding: "8px 0 max(8px, env(safe-area-inset-bottom))",
@@ -1182,5 +1264,6 @@ export default function App() {
         })}
       </div>
     </div>
+    </ThemeContext.Provider>
   );
 }
