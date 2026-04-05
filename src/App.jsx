@@ -166,6 +166,68 @@ const EXERCISES = [
     instruction: "Read once through. Statements should land with downward inflection. The two questions should rise. Vary your tone to match the intention of each sentence.",
     content: "The team gathered in the boardroom at nine. The quarterly figures were stronger than expected. Revenue had climbed steadily since January. The head of sales presented the regional breakdown with confidence. Europe had outperformed North America for the second consecutive quarter. \"Does anyone have questions about the methodology?\" she asked. The room stayed quiet for a moment. Then the finance director spoke. \"The margins look solid, but can we sustain this into the second half?\" It was a fair challenge. She nodded and walked the room through the forecast." },
 
+  // ── TONGUE TWISTERS ──
+  { id: "tt-list", title: "Tongue Twisters", area: "tongue-twisters", tag: "Connected Speech", type: "sentences",
+    instruction: "Read each tongue twister 5 times slowly, then 5 times at increasing speed. Focus on crisp articulation throughout. If you stumble, slow back down.",
+    content: [
+      "High roller, low roller, lower roller.",
+      "I need a box of biscuits, a box of mixed biscuits, and a biscuit mixer.",
+      "He thrusts his fists against the posts and still insists he sees the ghosts.",
+      "The jolly collie swallowed a lollipop.",
+      "The sick sister's zither ceaseth; therefore she sufficeth us.",
+      "Friday's Five Fresh Fish Specials.",
+      "Imagine an imaginary menagerie manager imagining managing an imaginary menagerie.",
+      "Twixt this and six thick thistle sticks.",
+      "Red leather, yellow leather.",
+      "She sells seashells by the seashore, and the shells she sells are seashells.",
+      "Peter Piper picked a peck of pickled peppers. A peck of pickled peppers Peter Piper picked. If Peter Piper picked a peck of pickled peppers, where's the peck of pickled peppers Peter Piper picked?"
+    ] },
+  { id: "tt-dark-l", title: "Dark L Tongue Twisters", area: "tongue-twisters", tag: "Dark L", type: "sentences",
+    instruction: "These target the dark L specifically. Read each 5 times slowly, sustaining the L sounds firmly. Then increase speed without losing the Ls.",
+    content: [
+      "The jolly collie swallowed a lollipop.",
+      "A little bottle of purple pills sat on the table.",
+      "Bill built a beautiful bell on the hill by the tall wall.",
+      "The careful general travelled to the capital through the central canal.",
+      "A full bottle will spill if you pull it off the table."
+    ] },
+  { id: "tt-final", title: "Final Consonant Tongue Twisters", area: "tongue-twisters", tag: "Finals", type: "sentences",
+    instruction: "These are loaded with strong final consonants. Read slowly and land firmly on every word ending. Then build speed while keeping the endings crisp.",
+    content: [
+      "He thrusts his fists against the posts and still insists he sees the ghosts.",
+      "Six strict silk script critics picked the next distinct district.",
+      "She asked and risked and walked and talked and worked and looked.",
+      "The fact that the draft contract lacked impact was direct and distinct.",
+      "He helped protect the project and reflect on the effect of the strict act."
+    ] },
+  { id: "tt-speed", title: "Speed Control Tongue Twisters", area: "tongue-twisters", tag: "Speed", type: "sentences",
+    instruction: "Start at half your normal speed. Read three times slowly, three times at medium pace, then three times at your natural speed. If any sounds blur together, you have gone too fast.",
+    content: [
+      "Red leather, yellow leather.",
+      "Unique New York, unique New York, you know you need unique New York.",
+      "Imagine an imaginary menagerie manager imagining managing an imaginary menagerie.",
+      "I need a box of biscuits, a box of mixed biscuits, and a biscuit mixer.",
+      "She sells seashells by the seashore, and the shells she sells are seashells."
+    ] },
+
+  // ── COMBINED PRACTICE (mixed area) ──
+  { id: "mx-1", title: "The Studio Visit", area: "mixed", tag: "All targets", type: "passage",
+    instruction: "This passage combines crunching clusters, dark Ls, final consonants, and -ing endings. Read at a measured pace with breath control. Apply all techniques simultaneously.",
+    content: "The **student** arrived at the **studio** on **Tuesday** **morning**, **feeling** well prepared. She had **walked** from the **little** flat on the corner, **carrying** a **beautiful** portfolio under her arm. Her **tutor** had **asked** her to bring **all** of her recent **drawings**. The **street** was quiet, and a light **drizzle** had **started** to **fall**. She **strolled** through the front entrance and took the **stairs** to the **tall** room on the second **floor**. **Everything** was **still** in its **place**. She set her work on the **table**, opened the first page, and waited. The **opportunity** to present her **draft** to the **full** panel was **nothing** short of a **privilege**.",
+    table: { "STU-": ["student", "studio"], "TU-": ["Tuesday", "tutor", "opportunity"], "DR-": ["drawings", "drizzle"], "STR-": ["street", "strolled", "stairs"], "Dark L": ["little", "beautiful", "all", "tall", "still", "table", "full", "privilege"], "Finals": ["walked", "asked", "draft", "started", "strolled"], "-ing": ["morning", "feeling", "carrying", "nothing", "everything"], "ɑː": ["started", "stairs", "draft"], "ɔː": ["floor", "tall", "all", "walked"] } },
+  { id: "mx-2", title: "The Regional Review", area: "mixed", tag: "All targets", type: "passage",
+    instruction: "A professional context passage. Read as if presenting to your team. Measured pace, clear endings, clean -ing sounds, deliberate lip rounding on oo/uː words.",
+    content: "**Good** **morning**. I want to take you through the **quarterly** update for the European region. The results are **strong**, and I believe we are **moving** in the right direction. Our **strategy** has been to **produce** high-quality content that meets **local** regulations. The **training** programme we **introduced** in January is **working** **well**. **Staff** across **all** **three** markets have completed the **tutorial**, and the feedback has been **beautiful** to see. There are **still** a few areas I want to flag. The **pipeline** in the Nordic **channel** is **thinner** than we **expected**. And the **structural** changes we **discussed** last **quarter** have not yet taken **full** **effect**. I will cover both in more **detail** on the next slide.",
+    table: { "TU-": ["quarterly", "tutorial"], "STR-": ["strategy", "strong", "structural"], "TR-": ["training", "three"], "Dark L": ["local", "well", "all", "beautiful", "still", "full", "detail", "channel", "structural"], "Finals": ["introduced", "discussed", "expected", "effect", "staff"], "-ing": ["morning", "moving", "working", "training"], "ɑː": ["staff"], "ɔː": ["quarterly", "all", "more"] } },
+  { id: "mx-3", title: "The Weekend Walk", area: "mixed", tag: "All targets", type: "passage",
+    instruction: "A narrative passage weaving in all target areas. Read slowly with full breath support. This is about sustaining technique across a longer piece of connected speech.",
+    content: "On **Saturday** **morning**, she **pulled** on her boots and set off along the **coastal** **trail**. The weather was **cool** and **still**, with low cloud sitting over the water. She **walked** at a **steady** pace, **breathing** deeply, **feeling** the rhythm of her **footsteps** on the **stony** **path**. A **strange** bird **called** from somewhere in the **tall** **grass**. She **stopped** to listen, then continued along the **track**. The **view** from the headland was **beautiful** in every direction. She **looked** out across the **dark** sea and **thought** about **nothing** in particular. After an hour, she **turned** and **strolled** back the way she had come, **passing** a **little** church with a crumbling stone **wall**. By the time she **reached** the **street** where her car was **parked**, she was **feeling** **calm** and entirely at ease.",
+    table: { "STR-": ["strange", "street", "strolled", "stony", "steady", "stopped"], "TR-": ["trail", "track", "turned"], "Dark L": ["coastal", "trail", "cool", "still", "tall", "beautiful", "little", "wall", "called", "calm"], "Finals": ["walked", "pulled", "looked", "thought", "reached", "parked", "stopped", "turned"], "-ing": ["morning", "breathing", "feeling", "passing", "nothing"], "ɑː": ["path", "grass", "dark", "calm", "parked"], "ɔː": ["tall", "called", "walked", "thought"] } },
+  { id: "mx-4", title: "The Product Launch", area: "mixed", tag: "All targets", type: "passage",
+    instruction: "A high-stakes professional scenario. Read with authority and control. Every sound must land. This is your boardroom voice.",
+    content: "Thank you **all** for being here this **morning**. Today we are **launching** the new platform across the European region. This has been twelve months in the **making**, and the **whole** team deserves credit. The **structure** of the rollout is **straightforward**. We go live in Germany on **Tuesday**, followed by France the **following** week. The **training** materials have been **produced** in **all** **three** languages, and the **local** teams have completed their **tutorials**. I **expect** the first **quarter** to be about **learning** and **refining**. We will **collect** feedback, **adjust** the **strategy**, and move **forward** with confidence. Our **goal** is **simple**: **deliver** a **product** that meets the highest **standard** across every market. I am **feeling** **good** about where we **stand**.",
+    table: { "STU-": ["structure"], "TU-": ["Tuesday", "tutorials"], "STR-": ["structure", "straightforward", "strategy", "standard", "stand"], "TR-": ["three", "training"], "Dark L": ["all", "whole", "local", "goal", "simple", "full", "well"], "Finals": ["expect", "produced", "collect", "adjust", "product", "standard", "stand"], "-ing": ["morning", "launching", "making", "following", "training", "learning", "refining", "feeling"] } },
+
   // ── SPEED & BREATH (20 passages from data file) ──
   ...READING_PASSAGES,
 
@@ -232,13 +294,15 @@ const CURRICULUM = [
 ];
 
 const AREA_META = {
-  crunching:   { label: "Crunching",       color: "#C67B5C", bg: "#F5E6DE" },
-  vowels:      { label: "Vowels",           color: "#6B5CA5", bg: "#EEEAF5" },
-  darkl:       { label: "Dark L & Finals",  color: "#3B7A9E", bg: "#E3F0F6" },
-  "bouncing-g":{ label: "Bouncing G",       color: "#9B6B3D", bg: "#F5EDE3" },
-  inflection:  { label: "Inflection",       color: "#7A5CA5", bg: "#F0EAF5" },
-  speed:       { label: "Speed & Breath",   color: "#4A6741", bg: "#E8EDE6" },
-  curriculum:  { label: "Curriculum",       color: "#2A8F82", bg: "#E0F2F0" },
+  crunching:          { label: "Crunching",          color: "#C67B5C", bg: "#F5E6DE" },
+  vowels:             { label: "Vowels",              color: "#6B5CA5", bg: "#EEEAF5" },
+  darkl:              { label: "Dark L & Finals",     color: "#3B7A9E", bg: "#E3F0F6" },
+  "bouncing-g":       { label: "Bouncing G",          color: "#9B6B3D", bg: "#F5EDE3" },
+  inflection:         { label: "Inflection",          color: "#7A5CA5", bg: "#F0EAF5" },
+  speed:              { label: "Speed & Breath",      color: "#4A6741", bg: "#E8EDE6" },
+  "tongue-twisters":  { label: "Tongue Twisters",     color: "#B85C38", bg: "#F5E8E2" },
+  mixed:              { label: "Combined Practice",   color: "#6B5050", bg: "#F0E8E8" },
+  curriculum:         { label: "Curriculum",          color: "#2A8F82", bg: "#E0F2F0" },
 };
 
 // ─── CURRICULUM → EXERCISE AREA MAPPING ───
@@ -255,7 +319,7 @@ const CURRICULUM_AREA_MAP = {
 
 function getUnlockedAreas(curriculumKeys) {
   const touched = new Set((curriculumKeys || []).map(k => k.split("-")[0]));
-  const areas = new Set(["speed"]); // speed always available (orphan — universal)
+  const areas = new Set(["speed", "tongue-twisters", "mixed"]); // always available
   touched.forEach(sId => {
     (CURRICULUM_AREA_MAP[sId] || []).forEach(a => areas.add(a));
   });
@@ -459,7 +523,7 @@ function TodayTab({ store, setStore }) {
   const session = store.sessions[today] || { warmup: false, drill: false, passage: false, practice: false };
 
   const todayExercises = sched.area === "mixed"
-    ? EXERCISES.filter(e => e.type === "passage").slice(0, 3)
+    ? [...EXERCISES.filter(e => e.area === "tongue-twisters"), ...EXERCISES.filter(e => e.area === "mixed")]
     : EXERCISES.filter(e => e.area === sched.area);
 
   // Pick a passage sequentially, advancing each day a session is completed
@@ -746,6 +810,15 @@ function FreePracticeView({ exercises, onBack, onDone }) {
   );
 }
 
+// ─── PASSAGE PRACTICE STEPS ───
+const PASSAGE_STEPS = [
+  { label: "Slow read",   subtitle: "Read through once slowly. Just orientation." },
+  { label: "Exaggerate",  subtitle: "Read with exaggerated technique. Over-do the target sounds." },
+  { label: "Exaggerate",  subtitle: "Again. Push the technique further." },
+  { label: "Exaggerate",  subtitle: "One more. Feel the muscle memory forming." },
+  { label: "Natural",     subtitle: "Pull back to natural delivery. The technique should still be there." },
+];
+
 // ─── EXERCISE DETAIL VIEW ───
 function ExerciseDetail({ ex, onBack, onDone }) {
   const T = React.useContext(ThemeContext);
@@ -753,6 +826,7 @@ function ExerciseDetail({ ex, onBack, onDone }) {
   const [words, setWords] = useState(() => ex.pool ? pickWords(ex.pool) : null);
   const isBreathPassage = ex.type === "passage" && ex.area === "speed";
   const [breathMode, setBreathMode] = useState(true);
+  const [activeStep, setActiveStep] = useState(0);
 
   return (
     <div style={{ padding: "0 20px 40px" }}>
@@ -834,6 +908,38 @@ function ExerciseDetail({ ex, onBack, onDone }) {
         )}
         {ex.type === "passage" && (
           <div>
+            {/* Step indicator */}
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", position: "relative", marginBottom: 10 }}>
+                {/* Connecting line behind circles */}
+                <div style={{ position: "absolute", top: "50%", left: "10%", right: "10%", height: 2, background: T.border, zIndex: 0, transform: "translateY(-50%)" }} />
+                {PASSAGE_STEPS.map((step, i) => {
+                  const isActive = i === activeStep;
+                  const isDone = i < activeStep;
+                  return (
+                    <button key={i} onClick={() => setActiveStep(i)} style={{
+                      ...btn, width: 34, height: 34, borderRadius: "50%", flexShrink: 0,
+                      background: isDone ? T.success : isActive ? meta.color : T.card,
+                      border: `2px solid ${isDone ? T.success : isActive ? meta.color : T.border}`,
+                      color: (isDone || isActive) ? "#fff" : T.muted,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: 13, fontWeight: 700, position: "relative", zIndex: 1,
+                    }}>
+                      {isDone ? <Check size={14} /> : i + 1}
+                    </button>
+                  );
+                })}
+              </div>
+              <div style={{ textAlign: "center", marginBottom: 2 }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: meta.color }}>
+                  Step {activeStep + 1}: {PASSAGE_STEPS[activeStep].label}
+                </span>
+              </div>
+              <p style={{ fontSize: 12, color: T.muted, textAlign: "center", margin: 0, lineHeight: 1.5 }}>
+                {PASSAGE_STEPS[activeStep].subtitle}
+              </p>
+            </div>
+            <div style={{ borderTop: `1px solid ${T.border}`, marginBottom: 16 }} />
             {isBreathPassage && breathMode
               ? <BreathPassage text={ex.content} style={{ fontSize: 18, lineHeight: 1.85, color: T.text }} />
               : <RichText text={ex.content} style={{ fontSize: 18, lineHeight: 1.85, color: T.text }} />
