@@ -1423,34 +1423,25 @@ export default function App() {
 
   return (
     <ThemeContext.Provider value={T}>
-      {/* Full-screen wrapper — spans entire physical screen */}
-      <div style={{
-        position: "fixed", top: 0, bottom: 0, left: 0, right: 0,
-        display: "flex", flexDirection: "column",
-        background: tabBarBg,
+      {/* App shell — height comes from .app-shell CSS class (100dvh) */}
+      <div className="app-shell" style={{
+        background: T.bg,
         fontFamily: "'Plus Jakarta Sans', system-ui, -apple-system, sans-serif",
-        WebkitFontSmoothing: "antialiased",
+        WebkitFontSmoothing: "antialiased", color: T.text,
       }}>
-        {/* 480px centered column for scrollable content only */}
-        <div style={{
-          flex: 1, width: "100%", maxWidth: 480, margin: "0 auto",
-          background: T.bg, overflow: "hidden", color: T.text,
-        }}>
-          <div style={{ height: "100%", overflowY: "auto", paddingTop: "env(safe-area-inset-top)" }}>
-            {tab === "today"     && <TodayTab store={store} setStore={setStore} />}
-            {tab === "exercises" && <ExercisesTab store={store} setStore={setStore} />}
-            {tab === "progress"  && <ProgressTab store={store} />}
-            {tab === "course"    && <CourseTab store={store} setStore={setStore} />}
-            {tab === "settings"  && <SettingsTab darkMode={darkMode} setDarkMode={setDarkMode} store={store} setStore={setStore} />}
-          </div>
+        {/* Scrollable content — padding-top from .app-scroll CSS class */}
+        <div className="app-scroll" style={{ maxWidth: 480, width: "100%", margin: "0 auto" }}>
+          {tab === "today"     && <TodayTab store={store} setStore={setStore} />}
+          {tab === "exercises" && <ExercisesTab store={store} setStore={setStore} />}
+          {tab === "progress"  && <ProgressTab store={store} />}
+          {tab === "course"    && <CourseTab store={store} setStore={setStore} />}
+          {tab === "settings"  && <SettingsTab darkMode={darkMode} setDarkMode={setDarkMode} store={store} setStore={setStore} />}
         </div>
 
-        {/* Tab bar — full width, direct child of the screen wrapper */}
-        <div style={{
-          flexShrink: 0,
+        {/* Tab bar — padding-bottom from .app-tabbar CSS class */}
+        <div className="app-tabbar" style={{
           background: tabBarBg, backdropFilter: "blur(12px)",
           borderTop: `1px solid ${T.border}`,
-          paddingBottom: "env(safe-area-inset-bottom)",
         }}>
           <div style={{ maxWidth: 480, margin: "0 auto", display: "flex", justifyContent: "space-around", paddingTop: 8, paddingBottom: 4 }}>
             {TABS.map(({ id, label, Icon }) => {
