@@ -323,6 +323,63 @@ function RichText({ text, style }) {
   );
 }
 
+// ─── BREATH PASSAGE RENDERER ───
+// Parses a passage string and renders full-breath (period) and half-breath (comma)
+// markers inline. Only used for speed/breath area passages with Breath Mode on.
+function BreathPassage({ text, style }) {
+  const T = React.useContext(ThemeContext);
+  if (!text) return null;
+
+  // Render the inline content of one sentence: handles **bold** and , → pause pill
+  const renderSentenceContent = (sentence, sentenceKey) => {
+    const parts = sentence.split(/(\*\*[^*]+\*\*|,)/g);
+    return parts.map((p, i) => {
+      if (p === ",") {
+        return (
+          <span key={i} style={{ display: "inline-flex", alignItems: "center", verticalAlign: "middle", margin: "0 2px" }}>
+            <span style={{
+              fontSize: 10, fontWeight: 700, color: T.warn,
+              background: T.warnLight, borderRadius: 4,
+              padding: "1px 6px", letterSpacing: 0.3, lineHeight: 1.5,
+            }}>pause</span>
+          </span>
+        );
+      }
+      if (p.startsWith("**") && p.endsWith("**")) {
+        return <strong key={i} style={{ color: T.accent, fontWeight: 700 }}>{p.slice(2, -2)}</strong>;
+      }
+      return <span key={i}>{p}</span>;
+    });
+  };
+
+  const sentences = text.split(".").map(s => s.trim()).filter(Boolean);
+
+  return (
+    <div>
+      {sentences.map((sentence, i) => {
+        const isLast = i === sentences.length - 1;
+        return (
+          <React.Fragment key={i}>
+            <div style={{ ...style, display: "block", marginBottom: 0 }}>
+              {renderSentenceContent(sentence, i)}
+            </div>
+            {!isLast && (
+              <div style={{ margin: "10px 0 10px", display: "flex", justifyContent: "center" }}>
+                <span style={{
+                  fontSize: 10, fontWeight: 700, letterSpacing: 1.2,
+                  color: "#fff", background: T.success,
+                  borderRadius: 6, padding: "3px 12px",
+                  textTransform: "uppercase",
+                }}>BREATHE</span>
+              </div>
+            )}
+          </React.Fragment>
+        );
+      })}
+    </div>
+  );
+}
+
 // ─── TIMER COMPONENT ───
 function Timer({ duration, onComplete }) {
   const T = React.useContext(ThemeContext);
@@ -694,6 +751,8 @@ function ExerciseDetail({ ex, onBack, onDone }) {
   const T = React.useContext(ThemeContext);
   const meta = AREA_META[ex.area] || { label: ex.area, color: T.primary, bg: T.primaryLight };
   const [words, setWords] = useState(() => ex.pool ? pickWords(ex.pool) : null);
+  const isBreathPassage = ex.type === "passage" && ex.area === "speed";
+  const [breathMode, setBreathMode] = useState(true);
 
   return (
     <div style={{ padding: "0 20px 40px" }}>
@@ -705,7 +764,33 @@ function ExerciseDetail({ ex, onBack, onDone }) {
       {ex.tag && <Pill label={ex.tag} color={T.muted} bg={T.border} small style={{ marginLeft: 6 }} />}
 
       <h2 style={{ fontSize: 22, fontWeight: 700, margin: "10px 0 6px" }}>{ex.title}</h2>
-      <p style={{ fontSize: 14, color: T.muted, lineHeight: 1.6, margin: "0 0 20px" }}>{ex.instruction}</p>
+      <p style={{ fontSize: 14, color: T.muted, lineHeight: 1.6, margin: "0 0 16px" }}>{ex.instruction}</p>
+
+      {/* Breath Mode toggle — speed passages only */}
+      {isBreathPassage && (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>Breath Mode</span>
+          <button onClick={() => setBreathMode(b => !b)} style={{
+            ...btn, padding: "5px 14px", borderRadius: 16, fontSize: 12, fontWeight: 700,
+            background: breathMode ? T.success : T.primaryLight,
+            color: breathMode ? "#fff" : T.muted,
+            transition: "background 0.15s",
+          }}>
+            {breathMode ? "ON" : "OFF"}
+          </button>
+        </div>
+      )}
+
+      {/* Breath Mode instructions */}
+      {isBreathPassage && breathMode && (
+        <div style={{ background: T.successLight, borderRadius: 10, padding: "10px 14px", marginBottom: 14 }}>
+          <p style={{ margin: 0, fontSize: 12, color: T.success, lineHeight: 1.65 }}>
+            <strong>BREATHE</strong> = stop, belly breath, 2–3 seconds.{" "}
+            <strong>pause</strong> = quick top-up, don't gasp.{" "}
+            If it feels uncomfortably slow, you're doing it right.
+          </p>
+        </div>
+      )}
 
       <Card>
         {ex.type === "wordlist" && (
@@ -749,7 +834,10 @@ function ExerciseDetail({ ex, onBack, onDone }) {
         )}
         {ex.type === "passage" && (
           <div>
-            <RichText text={ex.content} style={{ fontSize: 18, lineHeight: 1.85, color: T.text }} />
+            {isBreathPassage && breathMode
+              ? <BreathPassage text={ex.content} style={{ fontSize: 18, lineHeight: 1.85, color: T.text }} />
+              : <RichText text={ex.content} style={{ fontSize: 18, lineHeight: 1.85, color: T.text }} />
+            }
           </div>
         )}
       </Card>
