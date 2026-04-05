@@ -1412,11 +1412,6 @@ export default function App() {
     setLoaded(true);
   }, []);
 
-  // Colour the body to match the tab bar so the iOS home-indicator zone
-  // (below our layout) blends with the nav bar instead of showing beige.
-  useEffect(() => {
-    document.body.style.background = darkMode ? "#1a1a1a" : "#ffffff";
-  }, [darkMode]);
 
   if (!loaded) return (
     <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", color: T.muted }}>
@@ -1428,38 +1423,36 @@ export default function App() {
 
   return (
     <ThemeContext.Provider value={T}>
-      {/* Full-screen wrapper — no max-width, so it truly reaches the physical bottom */}
+      {/* Full-screen wrapper — spans entire physical screen */}
       <div style={{
         position: "fixed", top: 0, bottom: 0, left: 0, right: 0,
         display: "flex", flexDirection: "column",
-        background: darkMode ? "#1a1a1a" : "#ffffff",
+        background: tabBarBg,
         fontFamily: "'Plus Jakarta Sans', system-ui, -apple-system, sans-serif",
         WebkitFontSmoothing: "antialiased",
       }}>
-        {/* 480px centered column */}
+        {/* 480px centered column for scrollable content only */}
         <div style={{
           flex: 1, width: "100%", maxWidth: 480, margin: "0 auto",
-          background: T.bg, display: "flex", flexDirection: "column",
-          overflow: "hidden", color: T.text,
+          background: T.bg, overflow: "hidden", color: T.text,
         }}>
-          {/* Scrollable content */}
-          <div style={{ flex: 1, overflowY: "auto", paddingTop: "env(safe-area-inset-top)" }}>
+          <div style={{ height: "100%", overflowY: "auto", paddingTop: "env(safe-area-inset-top)" }}>
             {tab === "today"     && <TodayTab store={store} setStore={setStore} />}
             {tab === "exercises" && <ExercisesTab store={store} setStore={setStore} />}
             {tab === "progress"  && <ProgressTab store={store} />}
             {tab === "course"    && <CourseTab store={store} setStore={setStore} />}
             {tab === "settings"  && <SettingsTab darkMode={darkMode} setDarkMode={setDarkMode} store={store} setStore={setStore} />}
           </div>
+        </div>
 
-          {/* Tab Bar — flex child; padding-bottom covers home indicator */}
-          <div style={{
-            flexShrink: 0,
-            background: tabBarBg, backdropFilter: "blur(12px)",
-            borderTop: `1px solid ${T.border}`,
-            display: "flex", justifyContent: "space-around",
-            paddingTop: 8,
-            paddingBottom: "env(safe-area-inset-bottom)",
-          }}>
+        {/* Tab bar — full width, direct child of the screen wrapper */}
+        <div style={{
+          flexShrink: 0,
+          background: tabBarBg, backdropFilter: "blur(12px)",
+          borderTop: `1px solid ${T.border}`,
+          paddingBottom: "env(safe-area-inset-bottom)",
+        }}>
+          <div style={{ maxWidth: 480, margin: "0 auto", display: "flex", justifyContent: "space-around", paddingTop: 8, paddingBottom: 4 }}>
             {TABS.map(({ id, label, Icon }) => {
               const active = tab === id;
               return (
