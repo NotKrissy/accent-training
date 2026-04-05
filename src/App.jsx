@@ -21,7 +21,7 @@ const LIGHT_THEME = {
 };
 
 const DARK_THEME = {
-  bg: "#0f0f0f", card: "#1a1a1a", primary: "#7b9ef0", primaryLight: "#1e2a42",
+  bg: "#0f0f0f", card: "#1a1a1a", primary: "#89CFF0", primaryLight: "#0e2030",
   accent: "#f0a060", accentLight: "#2e1f0e", text: "#f0f0f0", muted: "#888888",
   border: "#2a2a2a", success: "#4caf72", successLight: "#0e2018",
   warn: "#e0a030", warnLight: "#2a1e00",
